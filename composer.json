@@ -16,7 +16,7 @@
     	"php": ">=5.3.0",
     	"mouf/html.htmlelement": "~2.0",
     	"mouf/utils.cache.cache-interface": "~2.0",
-    	"twig/twig": "1.*"
+    	"twig/twig": "1.*@stable"
     },
     "autoload": {
         "psr-0": {
