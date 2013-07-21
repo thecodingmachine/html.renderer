@@ -25,15 +25,9 @@ use Mouf\MoufException;
  *
  * @author David Négrier <david@mouf-php.com>
  */
-class DefaultRenderer implements RendererInterface {
+class FileBasedRenderer implements RendererInterface {
 
 	private $directory;
-	
-	/**
-	 * A local copy of the mapping between class/context and the renderer file name.
-	 * @var array<string,string>
-	 */
-	private $cache = array();
 
 	private $cacheService;
 	
@@ -95,13 +89,10 @@ class DefaultRenderer implements RendererInterface {
 		
 		// Optimisation: let's see if we already performed the file_exists checks.
 		$cacheKey = $fullClassName.'/'.$context;
-		if (isset($this->cache[$cacheKey])) {
-			return $this->cache[$cacheKey];
-		} else {
-			$cachedValue = $this->cacheService->get("defaultRenderer_".$this->directory.'/'.$cacheKey);
-			if ($cachedValue !== null) {
-				return $cachedValue;
-			}
+
+		$cachedValue = $this->cacheService->get("FileBasedRenderer_".$this->directory.'/'.$cacheKey);
+		if ($cachedValue !== null) {
+			return $cachedValue;
 		}
 		
 		$fileName = false;
@@ -110,15 +101,13 @@ class DefaultRenderer implements RendererInterface {
 		
 		if ($context) {
 			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
-				$this->cache[$cacheKey] = $baseFileName.'__'.$context.'.twig';
-				$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'__'.$context.'.twig');
-				return $this->cache[$cacheKey];
+				$this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'__'.$context.'.twig');
+				return $baseFileName.'__'.$context.'.twig';
 			}
 		}
 		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
-			$this->cache[$cacheKey] = $baseFileName.'.twig';
-			$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'.twig');
-			return $this->cache[$cacheKey];
+			$this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'.twig');
+			return $baseFileName.'.twig';
 		}
 		
 		$fileName = $this->findFile($fullClassName, $context);
@@ -146,8 +135,7 @@ class DefaultRenderer implements RendererInterface {
 			}
 		}
 		
-		$this->cache[$cacheKey] = $fileName;
-		$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $fileName);
+		$this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $fileName);
 		return $fileName;
 	}
 	

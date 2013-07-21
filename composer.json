@@ -26,6 +26,12 @@
     },
     "extra": {
 	    "mouf": {
+	        "install": [
+	    		{
+	    			"type": "file",
+	    			"file": "src/install.php"
+	    		}
+	    	],
 	    	"logo": "logo.png"
 	    }
 	}
