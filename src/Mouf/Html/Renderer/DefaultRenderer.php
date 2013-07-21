@@ -8,6 +8,7 @@
 namespace Mouf\Html\Renderer;
 
 use Mouf\Utils\Cache\CacheInterface;
+use Mouf\MoufException;
 
 /**
  * This class is a renderer that renders objects using a directory containing template files.
@@ -34,7 +35,9 @@ class DefaultRenderer implements RendererInterface {
 	 */
 	private $cache = array();
 
-	private $cacheService;	
+	private $cacheService;
+	
+	private $twig;
 
 	/**
 	 * 
@@ -44,6 +47,12 @@ class DefaultRenderer implements RendererInterface {
 	public function __construct($directory = "src/templates", CacheInterface $cacheService) {
 		$this->directory = trim($directory, '/\\');
 		$this->cacheService = $cacheService;
+		
+		$loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
+		$this->twig = new \Twig_Environment($loader, array(
+				// The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
+				'cache' => rtrim(sys_get_temp_dir().'/\\').'/mouftwigtemplate'.ROOT_PATH.$this->directory
+		));
 	}
 
 	/**
@@ -67,7 +76,11 @@ class DefaultRenderer implements RendererInterface {
 	public function render($object, $context = null) {
 		$fileName = $this->getTemplateFileName($object, $context);
 		
-
+		if ($fileName != false) {
+			echo $this->twig->render($fileName, get_object_vars($object));
+		} else {
+			throw new MoufException("Cannot render object of class ".get_class($object).". No template found.");
+		}
 	}
 
 	/**
@@ -85,28 +98,69 @@ class DefaultRenderer implements RendererInterface {
 		if (isset($this->cache[$cacheKey])) {
 			return $this->cache[$cacheKey];
 		} else {
-			$cachedValue = $this->cacheService->get($this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey));
+			$cachedValue = $this->cacheService->get("defaultRenderer_".$this->directory.'/'.$cacheKey);
 			if ($cachedValue !== null) {
 				return $cachedValue;
 			}
 		}
 		
-		$baseFileName = ROOT_PATH.$this->directory.'/'.str_replace('\\', '/', $fullClassName);
+		$fileName = false;
+		
+		$baseFileName = str_replace('\\', '/', $fullClassName);
 		
 		if ($context) {
-			if (file_exists($baseFileName.'__'.$context.'.twig')) {
+			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
 				$this->cache[$cacheKey] = $baseFileName.'__'.$context.'.twig';
 				$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'__'.$context.'.twig');
 				return $this->cache[$cacheKey];
 			}
 		}
-		if (file_exists($baseFileName.'.twig')) {
+		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
 			$this->cache[$cacheKey] = $baseFileName.'.twig';
 			$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'.twig');
 			return $this->cache[$cacheKey];
 		}
-		$this->cache[$cacheKey] = false;
-		$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, false);
+		
+		$fileName = $this->findFile($fullClassName, $context);
+		$parentClass = $fullClassName;
+		// If no file is found, let's go through the parents of the object.
+		while (true) {
+			if ($fileName != false) {
+				break;
+			}
+			$parentClass = get_parent_class($parentClass);
+			if ($parentClass == false) {
+				break;
+			}
+			$fileName = $this->findFile($parentClass, $context);
+		}
+		
+		// Still no objects? Let's browse the interfaces.
+		if ($fileName == false) {
+			$interfaces = class_implements($fullClassName);
+			foreach ($interfaces as $interface) {
+				$fileName = $this->findFile($interface, $context);
+				if ($fileName != false) {
+					break;
+				}
+			}
+		}
+		
+		$this->cache[$cacheKey] = $fileName;
+		$this->cacheService->set("defaultRenderer_".$this->directory.'/'.$cacheKey, $fileName);
+		return $fileName;
+	}
+	
+	private function findFile($className, $context) {
+		$baseFileName = str_replace('\\', '/', $className);
+		if ($context) {
+			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
+				return $baseFileName.'__'.$context.'.twig';
+			}
+		}
+		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
+			return $baseFileName.'.twig';
+		}
 		return false;
 	}
 }
