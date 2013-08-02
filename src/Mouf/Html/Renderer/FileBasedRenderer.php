@@ -12,9 +12,9 @@ use Mouf\MoufException;
 
 /**
  * This class is a renderer that renders objects using a directory containing template files.
- * Each file should be a Twig file named after the PHP class full name (respecting the PSR-0 notation). 
+ * Each file should be a Twig file or PHP file named after the PHP class full name (respecting the PSR-0 notation). 
  *
- * For instance, the class Mouf\Menu\Item would be rendered by the file Mouf\Menu\Item.twig
+ * For instance, the class Mouf\Menu\Item would be rendered by the file Mouf\Menu\Item.twig or Mouf\Menu\Item.php
  * 
  * If a context is passed, it will be appended after a double underscore to the file name.
  * If the file does not exist, we default to the base class.
@@ -22,30 +22,46 @@ use Mouf\MoufException;
  * For instance, the class Mouf\Menu\Item with context "primary" would be rendered by the file Mouf\Menu\Item__primary.twig
  * 
  * If the template for the class is not found, a test through the parents of the class is performed.
+ * 
+ * If you are using PHP template files, the properties of the object are accessible using local vars.
+ * For instance, if your object has a $a property, the property can be accessed using the $a variable.
+ * Any property (even private properties can be accessed).
+ * The object is accessible using the $object variable. Private methods or properties of the $object cannot
+ * be accessed.
+ * 
  *
  * @author David Négrier <david@mouf-php.com>
  */
-class FileBasedRenderer implements RendererInterface {
+class FileBasedRenderer implements ChainableRendererInterface {
 
 	private $directory;
 
 	private $cacheService;
 	
 	private $twig;
+	
+	private $type;
 
+	private $priority;
+	
 	/**
 	 * 
 	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
 	 * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
+	 * @param string $type The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
+	 * @param number $priority The priority of the renderer (within its type)
 	 */
-	public function __construct($directory = "src/templates", CacheInterface $cacheService) {
+	public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0) {
 		$this->directory = trim($directory, '/\\');
 		$this->cacheService = $cacheService;
+		$this->type = $type;
+		$this->priority = $priority;
 		
 		$loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
 		$this->twig = new \Twig_Environment($loader, array(
 				// The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
-				'cache' => rtrim(sys_get_temp_dir().'/\\').'/mouftwigtemplate'.ROOT_PATH.$this->directory
+				'cache' => rtrim(sys_get_temp_dir().'/\\').'/mouftwigtemplate'.ROOT_PATH.$this->directory,
+				'auto_reload' => true
 		));
 	}
 
@@ -57,9 +73,9 @@ class FileBasedRenderer implements RendererInterface {
 		$fileName = $this->getTemplateFileName($object, $context);
 		
 		if ($fileName) {
-			return RendererInterface::CAN_RENDER_CLASS;
+			return ChainableRendererInterface::CAN_RENDER_CLASS;
 		} else {
-			return RendererInterface::CANNOT_RENDER;
+			return ChainableRendererInterface::CANNOT_RENDER;
 		}
 	}
 	
@@ -71,7 +87,19 @@ class FileBasedRenderer implements RendererInterface {
 		$fileName = $this->getTemplateFileName($object, $context);
 		
 		if ($fileName != false) {
-			echo $this->twig->render($fileName, get_object_vars($object));
+			if ($fileName['type'] == 'twig') {
+				$array = get_object_vars($object);
+				if (!isset($array['this'])) {
+					$array['this'] = $object;
+				}
+				echo $this->twig->render($fileName['fileName'], $array);
+			} else {
+				// Let's create a local variable
+				foreach (get_object_vars($object) as $var__tplt=>$value__tplt) {
+					$$var__tplt = $value__tplt;
+				}
+				include ROOT_PATH.$this->directory.'/'.$fileName['fileName'];
+			}
 		} else {
 			throw new MoufException("Cannot render object of class ".get_class($object).". No template found.");
 		}
@@ -99,16 +127,6 @@ class FileBasedRenderer implements RendererInterface {
 		
 		$baseFileName = str_replace('\\', '/', $fullClassName);
 		
-		if ($context) {
-			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
-				$this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'__'.$context.'.twig');
-				return $baseFileName.'__'.$context.'.twig';
-			}
-		}
-		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
-			$this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $baseFileName.'.twig');
-			return $baseFileName.'.twig';
-		}
 		
 		$fileName = $this->findFile($fullClassName, $context);
 		$parentClass = $fullClassName;
@@ -143,12 +161,34 @@ class FileBasedRenderer implements RendererInterface {
 		$baseFileName = str_replace('\\', '/', $className);
 		if ($context) {
 			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
-				return $baseFileName.'__'.$context.'.twig';
+				return array("fileName"=>$baseFileName.'__'.$context.'.twig',
+					"type"=>"twig");
+			} elseif (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.php')) {
+				return array("fileName"=>$baseFileName.'__'.$context.'.php',
+					"type"=>"php");
 			}
 		}
 		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
-			return $baseFileName.'.twig';
+			return array("fileName"=>$baseFileName.'.twig',
+					"type"=>"twig");
+		} elseif (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.php')) {
+			return array("fileName"=>$baseFileName.'.php',
+					"type"=>"php");
 		}
 		return false;
+	}
+	/* (non-PHPdoc)
+	 * @see \Mouf\Html\Renderer\ChainableRendererInterface::getRendererType()
+	 */
+	public function getRendererType() {
+		return $this->type;
 	}
+
+	/* (non-PHPdoc)
+	 * @see \Mouf\Html\Renderer\ChainableRendererInterface::getPriority()
+	 */
+	public function getPriority() {
+		return $this->priority;
+	}
+
 }

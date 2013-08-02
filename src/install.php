@@ -9,6 +9,7 @@ require_once __DIR__."/../../../autoload.php";
 
 use Mouf\Actions\InstallUtils;
 use Mouf\MoufManager;
+use Mouf\Html\Renderer\ChainableRendererInterface;
 
 // Let's init Mouf
 InstallUtils::init(InstallUtils::$INIT_APP);
@@ -16,20 +17,19 @@ InstallUtils::init(InstallUtils::$INIT_APP);
 // Let's create the instance
 $moufManager = MoufManager::getMoufManager();
 
-if (!$moufManager->instanceExists("rendererCacheService")) {
-	$rendererCacheService = $moufManager->createInstance("Mouf\\Utils\\Cache\\InMemoryCache");
-	$rendererCacheService->setName("rendererCacheService");
-	if ($moufManager->instanceExists("apcCacheService")) {
-		$rendererCacheService->getProperty("chainWith")->setValue($moufManager->getInstanceDescriptor("apcCacheService"));
-	}
+$rendererCacheService = InstallUtils::getOrCreateInstance("rendererCacheService", "Mouf\\Utils\\Cache\\InMemoryCache", $moufManager);
+if ($moufManager->instanceExists("apcCacheService")) {
+	$rendererCacheService->getProperty("chainWith")->setValue($moufManager->getInstanceDescriptor("apcCacheService"));
 }
 
-if (!$moufManager->instanceExists("customRenderer")) {
-	$customRenderer = $moufManager->createInstance("Mouf\\Html\\Renderer\\FileBasedRenderer");
-	$customRenderer->setName("customRenderer");
-	$customRenderer->getProperty("directory")->setValue("src/templates");
-	$customRenderer->getProperty("cacheService")->setValue($rendererCacheService);
-}
+$customRenderer = InstallUtils::getOrCreateInstance("customRenderer", "Mouf\\Html\\Renderer\\FileBasedRenderer", $moufManager);
+$customRenderer->getProperty("directory")->setValue("src/templates");
+$customRenderer->getProperty("cacheService")->setValue($rendererCacheService);
+$customRenderer->getProperty("type")->setValue(ChainableRendererInterface::TYPE_CUSTOM);
+$customRenderer->getProperty("priority")->setValue(0);
+
+$defaultRenderer = InstallUtils::getOrCreateInstance("defaultRenderer", "Mouf\\Html\\Renderer\\AutoChainRenderer", $moufManager);
+$defaultRenderer->getProperty("cacheService")->setValue($rendererCacheService);
 
 $old = umask(0);
 mkdir(ROOT_PATH.'src/templates', 0775, true);

@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Strict//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>/home/david/projects/mouf/mouf2/vendor/mouf/html.renderer/doc/.for_package_developers.md.html</title>
+
+
+<style type="text/css">
+
+.markdown-body {
+    border: 1px solid #CACACA;
+    padding: 30px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.markdown-body h2 {
+    border-bottom: 1px solid #CCCCCC;
+}
+
+.markdown-body code {
+    white-space: nowrap;
+}
+
+.markdown-body code, .markdown-body tt {
+    background-color: #F8F8F8;
+    border: 1px solid #EAEAEA;
+    border-radius: 3px 3px 3px 3px;
+    margin: 0 2px;
+    padding: 0 5px;
+}
+
+.markdown-body .highlight pre, .markdown-body pre {
+    background-color: #F8F8F8;
+    border: 1px solid #CCCCCC;
+    border-radius: 3px 3px 3px 3px;
+    font-size: 13px;
+    line-height: 19px;
+    overflow: auto;
+    padding: 6px 10px;
+}
+
+.markdown-body img {
+    border: 0 none;
+}
+
+pre, code, tt {
+    font-family: Consolas,"Liberation Mono",Courier,monospace;
+    font-size: 12px;
+}
+</style>
+
+
+<script type="text/javascript">
+
+function getDocumentScrollTop() 
+{
+   var res = document.body.scrollTop || document.documentElement.scrollTop || window.pageYOffset || 0;
+   // alert(res);
+   return res;
+}
+
+function setDocumentScrollTop(ypos) 
+{
+	window.scrollTo(0, ypos);
+}
+
+</script>
+
+
+</head>
+<body class="markdown-body">
+<h1>
+<a name="renderers-for-package-developers" class="anchor" href="#renderers-for-package-developers"><span class="octicon octicon-link"></span></a>Renderers for package developers</h1>
+
+<p>If you are developing a package, and if you have items in your package that might be rendered in HTML, you
+should definitely consider using the rendering system. Indeed, it is a simple way to allow your package
+users to <a href="for_application_developers.md">overload your template</a>, if they need to.</p>
+
+<p>For this, you need to provide a Mouf installer for your package, that will be in charge of creating the renderer's Mouf
+instance. Hopefully, this is fairly easy to do.</p>
+
+<p>First, if you are not used to writing Mouf install scripts for your packages, have a look at 
+the <a href="http://mouf-php.com/packages/mouf/mouf/doc/install_process.md">Mouf package installer documentation</a>.</p>
+
+<h2>
+<a name="if-you-are-used-to-install-script" class="anchor" href="#if-you-are-used-to-install-script"><span class="octicon octicon-link"></span></a>If you are used to install script</h2>
+
+<p>The only thing you need to know is that you should put this line in your installer script:</p>
+
+<div class="highlight"><pre><span class="k">use</span> <span class="nx">Mouf\Html\Renderer\RendererUtils</span><span class="p">;</span>
+
+<span class="nx">RendererUtils</span><span class="o">::</span><span class="na">createPackageRenderer</span><span class="p">(</span><span class="nv">$moufManager</span><span class="p">,</span> <span class="s2">"group/package_name"</span><span class="p">);</span>
+</pre></div>
+
+<p>This will create a renderer instance automatically. Your templates should go in the <em>src/templates</em> directory of 
+your package.</p>
+
+<h2>
+<a name="if-you-are-not-used-to-install-scripts" class="anchor" href="#if-you-are-not-used-to-install-scripts"><span class="octicon octicon-link"></span></a>If you are not used to install scripts</h2>
+
+<p>Here is a more details version of what you should do.</p>
+
+<p>First, let's start by creating an install script in <strong>src/install.php</strong></p>
+
+<div class="highlight"><pre><span class="k">require_once</span> <span class="nx">__DIR__</span><span class="o">.</span><span class="s2">"/../../../autoload.php"</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nx">Mouf\Actions\InstallUtils</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Mouf\MoufManager</span><span class="p">;</span>
+<span class="k">use</span> <span class="nx">Mouf\Html\Renderer\RendererUtils</span><span class="p">;</span>
+
+<span class="c1">// Let's init Mouf</span>
+<span class="nx">InstallUtils</span><span class="o">::</span><span class="na">init</span><span class="p">(</span><span class="nx">InstallUtils</span><span class="o">::</span><span class="nv">$INIT_APP</span><span class="p">);</span>
+
+<span class="nv">$moufManager</span> <span class="o">=</span> <span class="nx">MoufManager</span><span class="o">::</span><span class="na">getMoufManager</span><span class="p">();</span>
+
+<span class="c1">// Let's create the renderer</span>
+<span class="nx">RendererUtils</span><span class="o">::</span><span class="na">createPackageRenderer</span><span class="p">(</span><span class="nv">$moufManager</span><span class="p">,</span> <span class="s2">"group/package_name"</span><span class="p">);</span>
+
+<span class="c1">// Let's rewrite the MoufComponents.php file to save the component</span>
+<span class="nv">$moufManager</span><span class="o">-&gt;</span><span class="na">rewriteMouf</span><span class="p">();</span>
+
+<span class="c1">// Finally, let's continue the install</span>
+<span class="nx">InstallUtils</span><span class="o">::</span><span class="na">continueInstall</span><span class="p">();</span>
+</pre></div>
+
+<p>You will need to replace the "group/package_name" string with the name of your package.</p>
+
+<p>Finally, we must edit the <strong>composer.json</strong> file of your package and add this:</p>
+
+<div class="highlight"><pre><span class="p">{</span>
+    <span class="err">....</span>
+    <span class="nt">"extra"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">"mouf"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="nt">"install"</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span>
+                <span class="nt">"type"</span><span class="p">:</span> <span class="s2">"file"</span><span class="p">,</span>
+                <span class="nt">"file"</span><span class="p">:</span> <span class="s2">"src/install.php"</span>
+                <span class="p">}</span>
+            <span class="p">]</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>This will register our installer.
+For your installer to be detected, you will have to commit/push your changes, and run <code>php composer.phar update</code>
+so that Composer can detect your new install file.</p>
+
+<p>Then, each time you install your package, Mouf will propose an installation step in the Mouf UI that will
+create the renderer installer.</p>
+
+<p>Once you have done this, you can use the renderer in your package, <a href="for_application_developers.md">just like a normal application developer would do</a>, e.g.:</p>
+
+<ol>
+<li>Implement the <code>HtmlElementInterface</code> (optional)</li>
+<li>Use the <code>Renderable</code> trait</li>
+<li>Add a template file in the <em>src/templates</em> directory</li>
+</ol><p>Now that we saw how a package developer can provide templates for the application developers, let's have a look at the 
+way things are done <a href="for_template_developers.md">on the template developer side</a></p>
+</body>
+</html>
