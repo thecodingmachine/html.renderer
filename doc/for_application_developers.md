@@ -56,7 +56,7 @@ also a very concise syntax making it pleasant to use.
 
 When you are working with Twig, your object is accessible using the "this" variable.
 
-<table>
+<table class="table table-bordered">
 	<tr>
 		<th>In your class</th>
 		<th>In Twig</th>
@@ -84,18 +84,18 @@ Plain PHP files can also be used as template files.
 This is way more flexible than Twig, but there are also way more ways to make errors.
 The $object variable is a pointer to the object you are rendering.
 
-<table>
+<table class="table table-bordered">
 	<tr>
 		<th>In your class</th>
 		<th>In your PHP template</th>
 	</tr>
 	<tr>
 		<td><code>public $myVar</code></td>
-		<td><code><?= $myVar ?> or <?= $object->myVar ?> (public properties can be accessed as variables without using the $object variable.</code></td>
+		<td><code>&lt;?= $myVar ?&gt; or &lt;?= $object->myVar ?&gt; (public properties can be accessed as variables without using the $object variable.</code></td>
 	</tr>
 	<tr>
 		<td><code>public function getVar2() { ... }</code></td>
-		<td><code><?= $object->getVar2() ?></code> You can access any method of the object through the <code>$object</code> variable.</td>
+		<td><code>&lt;?= $object->getVar2() ?&gt;</code> You can access any method of the object through the <code>$object</code> variable.</td>
 	</tr>
 </table>
 
@@ -120,10 +120,16 @@ So this is very easy.
 on the cache to speed up things. When you create a new template file or delete a template file, you should
 purge the cache (the Red "Purge cache" button in Mouf2 UI).</div>
 
+One thing that is important to note: if your class
+[implements the <code>HtmlElementInterface</code> class](http://mouf-php.com/packages/mouf/html.htmlelement/README.md)
+(and you can implement it because all necessary methods are provided by the <code>Traversable</code> trait),
+then you can use instances of your class in many packages provided by Mouf (especially, you can drag'n'drop
+instances if your class directly into blocks, that are used by templates). This can be very useful!
+
 Extending existing renderers
 ----------------------------
 
-Some packages are templates you are using might also be using renderers. The great news is that you can overload
+Some packages or templates you are using might also be using renderers. The great news is that you can overload
 these renderers with your own renderers very easily.
 
 Let's take a sample. The *mouf/html.widgets.messageservice* package provides a **Mouf\Html\Widgets\MessageService\Widget\RenderedMessage** class that is "renderable".
@@ -136,7 +142,7 @@ For instance:
 <div class='alert alert-{{ this.userMessage.type|e('html_attr') }}'>
 {{ this.userMessage.message|raw }}
 {% if this.nbMessages > 1 %}
- <strong>{{ this.nbMessages }}</strong>
+ <strong>x {{ this.nbMessages }}</strong>
 {% endif %}
 </div>
 ```
@@ -157,7 +163,7 @@ Here is what is happening:
 	  Renderers in the packages can be ordered by priority.
 	  
 <div class="alert alert-info">When a new renderer is added (for instance when you install a package
-that uses its own renderer, do not forget to purge the cache (the Red "Purge cache" button in Mouf2 UI).</div>
+that uses its own renderer), do not forget to purge the cache (the Red "Purge cache" button in Mouf2 UI).</div>
 
 Now that we saw how an application developer can use and overload a package template, let's have a look at the 
 way things are done [on the package developer side](for_package_developers.md)

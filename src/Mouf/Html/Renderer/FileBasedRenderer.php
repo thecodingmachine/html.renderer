@@ -9,6 +9,8 @@ namespace Mouf\Html\Renderer;
 
 use Mouf\Utils\Cache\CacheInterface;
 use Mouf\MoufException;
+use Mouf\Html\Renderer\Twig\MoufTwigExtension;
+use Mouf\MoufManager;
 
 /**
  * This class is a renderer that renders objects using a directory containing template files.
@@ -63,6 +65,7 @@ class FileBasedRenderer implements ChainableRendererInterface {
 				'cache' => rtrim(sys_get_temp_dir().'/\\').'/mouftwigtemplate'.ROOT_PATH.$this->directory,
 				'auto_reload' => true
 		));
+		$this->twig->addExtension(new MoufTwigExtension(MoufManager::getMoufManager()));
 	}
 
 	/**

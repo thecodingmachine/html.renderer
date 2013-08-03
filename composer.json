@@ -46,6 +46,10 @@
 	    			"url": "doc/for_template_developers.md"
 	    		},
 	    		{
+	    			"title": "Twig extensions",
+	    			"url": "doc/twig_extensions.md"
+	    		},
+	    		{
 	    			"title": "Advanced topics",
 	    			"url": "doc/advanced.md"
 	    		}
