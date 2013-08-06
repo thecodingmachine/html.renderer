@@ -3,6 +3,8 @@ Renderers for application developers
 
 You are an application developer? Here is what you need to know to use the rendering system efficiently.
 
+<iframe width="480" height="360" src="//www.youtube.com/embed/f2MyYSUic1U" frameborder="0" allowfullscreen></iframe>
+
 The rendering system provides an easy way to render in HTML your objects. This is a 3 steps process:
 
 1. Your class should implement the <code>HtmlElementInterface</code> (optional)

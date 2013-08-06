@@ -8,6 +8,10 @@ For application developers
 You are an application developer? [Learn how to use the rendering system](doc/for_application_developers.md) with PHP files or Twig templates
 to render your objects or overload renderers provided by packages.
 
+See the video!
+
+<iframe width="480" height="360" src="//www.youtube.com/embed/f2MyYSUic1U" frameborder="0" allowfullscreen></iframe>
+
 For package developers
 --------------------------------
 You are a package developer? Learn how to use the rendering system to allow other users to overload
