@@ -67,6 +67,14 @@ class MoufTwigExtension extends Twig_Extension {
 						return $moufManager->getInstance($param)->val();
 					}
 				}),
+				
+				/**
+				 * The t function will call the eMsg() method of the string passed in parameter
+				 */
+				new \Twig_SimpleFunction('t', function() {
+					$args = func_get_args();
+					return call_user_func_array("iMsg", $args);
+				})
 		);
 	}
 }

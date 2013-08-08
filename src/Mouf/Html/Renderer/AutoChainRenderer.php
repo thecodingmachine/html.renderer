@@ -29,11 +29,11 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 	/**
 	 * @var ChanableRendererInterface[]
 	 */
-	private $packageRenderers;
+	private $packageRenderers = array();
 	/**
 	 * @var ChanableRendererInterface[]
 	 */
-	private $customRenderers;
+	private $customRenderers = array();
 	
 	private $cacheService;
 	
@@ -98,13 +98,15 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 			}
 			
 			/* @var $renderer ChainableRendererInterface */
-			$result = $this->templateRenderer->canRender($object, $context);
-			if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
-				$isCachable = false;
-			}
-			if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
-				$foundRenderer = $this->templateRenderer;
-				break;
+			if ($this->templateRenderer) {
+				$result = $this->templateRenderer->canRender($object, $context);
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+					$isCachable = false;
+				}
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+					$foundRenderer = $this->templateRenderer;
+					break;
+				}
 			}
 			
 			foreach ($this->packageRenderers as $renderer) {
