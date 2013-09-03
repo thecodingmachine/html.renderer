@@ -31,9 +31,11 @@ $customRenderer->getProperty("priority")->setValue(0);
 $defaultRenderer = InstallUtils::getOrCreateInstance("defaultRenderer", "Mouf\\Html\\Renderer\\AutoChainRenderer", $moufManager);
 $defaultRenderer->getProperty("cacheService")->setValue($rendererCacheService);
 
-$old = umask(0);
-mkdir(ROOT_PATH.'src/templates', 0775, true);
-umask($old);
+if (!file_exists(ROOT_PATH.'src/templates')) {
+	$old = umask(0);
+	mkdir(ROOT_PATH.'src/templates', 0775, true);
+	umask($old);
+}
 
 // Let's rewrite the MoufComponents.php file to save the component
 $moufManager->rewriteMouf();
