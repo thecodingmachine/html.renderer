@@ -74,6 +74,13 @@ class MoufTwigExtension extends Twig_Extension {
 				new \Twig_SimpleFunction('t', function() {
 					$args = func_get_args();
 					return call_user_func_array("iMsg", $args);
+				}),
+				
+				/**
+				 * The l function will create a relative URL : in fact, it simply preprends th ROOT_URL
+				 */
+				new \Twig_SimpleFunction('l', function($param) {
+					return ROOT_URL . $param;
 				})
 		);
 	}
