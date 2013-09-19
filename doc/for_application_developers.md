@@ -79,8 +79,14 @@ Autoescaping is enabled by default.
 Performance-wise, templates are compiled as PHP files and cached. When a template file is modified, Twig detects the
 change and recompiles the template.
 
-The rendering engines comes with a set of functions dedicated to Mouf. You can check it out on the
-[Mouf's Twig extensions](twig_extensions.md) page.
+Twig extensions
+---------------
+
+The rendering engines comes with a set of functions dedicated to Mouf. For instance, you can
+use the `toHtml()` Twig function to render any widget declared as a Mouf instance. You can use
+`val()` Twig function to evaluate any instance implementing `ValueInterface`.
+You can check all these function and more on the
+[Mouf's Twig extensions](http://mouf-php.com/packages/mouf/html.renderer.twig-extensions/doc/twig_extensions.md) page.
 
 About PHP templates
 -------------------
