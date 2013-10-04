@@ -91,14 +91,23 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		
 		if ($fileName != false) {
 			if ($fileName['type'] == 'twig') {
-				$array = get_object_vars($object);
+				if (method_exists($object, 'getPrivateProperties')) {
+					$array = $object->getPrivateProperties();
+				} else {
+					$array = get_object_vars($object);
+				}
 				if (!isset($array['this'])) {
 					$array['this'] = $object;
 				}
 				echo $this->twig->render($fileName['fileName'], $array);
 			} else {
+				if (method_exists($object, 'getPrivateProperties')) {
+					$array = $object->getPrivateProperties();
+				} else {
+					$array = get_object_vars($object);
+				}
 				// Let's create a local variable
-				foreach (get_object_vars($object) as $var__tplt=>$value__tplt) {
+				foreach ($array as $var__tplt=>$value__tplt) {
 					$$var__tplt = $value__tplt;
 				}
 				include ROOT_PATH.$this->directory.'/'.$fileName['fileName'];
