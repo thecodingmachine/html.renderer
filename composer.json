@@ -1,57 +1,58 @@
 {
-    "name": "mouf/html.renderer",
-    "description": "This package contains the rendering mechanism of the Mouf framework. It is a mechanism allowing packages/templates/developers to overload a default template for various HTML objects.",
-    "keywords": ["html", "tohtml", "interface", "render"],
-    "homepage": "http://mouf-php.com/packages/mouf/html.renderer",
-    "type": "mouf-library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "David Négrier",
-            "email": "d.negrier@thecodingmachine.com",
-            "homepage": "http://mouf-php.com"
-        }
-    ],
-    "require": {
-    	"php": ">=5.4.0",
-    	"mouf/html.htmlelement": "~2.0",
-    	"twig/twig": "1.*@stable",
-    	"mouf/utils.cache.in-memory-cache": "~1.0",
-    	"mouf/utils.cache.apc-cache": "~2.0",
-		"mouf/html.renderer.twig-extensions": "~1.0"
-    },
-    "autoload": {
-        "psr-0": {
-            "Mouf": "src/"
-        }
-    },
-    "extra": {
-	    "mouf": {
-	        "install": [
-	    		{
-	    			"type": "file",
-	    			"file": "src/install.php"
-	    		}
-	    	],
-	    	"doc": [
-	    		{
-	    			"title": "For application developers",
-	    			"url": "doc/for_application_developers.md"
-	    		},
-	    		{
-	    			"title": "For package developers",
-	    			"url": "doc/for_package_developers.md"
-	    		},
-	    		{
-	    			"title": "For template developers",
-	    			"url": "doc/for_template_developers.md"
-	    		},
-	    		{
-	    			"title": "Advanced topics",
-	    			"url": "doc/advanced.md"
-	    		}
-	    		],
-	    	"logo": "logo.png"
-	    }
+	"name" : "mouf/html.renderer",
+	"description" : "This package contains the rendering mechanism of the Mouf framework. It is a mechanism allowing packages/templates/developers to overload a default template for various HTML objects.",
+	"type" : "mouf-library",
+	"authors" : [{
+			"name" : "David Négrier",
+			"email" : "d.negrier@thecodingmachine.com",
+			"homepage" : "http://mouf-php.com"
+		}
+	],
+	"keywords" : [
+		"html",
+		"tohtml",
+		"interface",
+		"render"
+	],
+	"homepage" : "http://mouf-php.com/packages/mouf/html.renderer",
+	"license" : [
+		"MIT"
+	],
+	"require" : {
+		"mouf/utils.cache.apc-cache" : "~2.0",
+		"twig/twig" : "1.*@stable",
+		"mouf/utils.cache.in-memory-cache" : "~1.0",
+		"php" : ">=5.4.4",
+		"mouf/html.htmlelement" : "~2.0",
+		"mouf/html.renderer.twig-extensions" : "~1.0"
+	},
+	"autoload" : {
+		"psr-0" : {
+			"Mouf" : "src/"
+		}
+	},
+	"extra" : {
+		"mouf" : {
+			"install" : [{
+					"file" : "src/install.php",
+					"type" : "file"
+				}
+			],
+			"logo" : "logo.png",
+			"doc" : [{
+					"title" : "For application developers",
+					"url" : "doc/for_application_developers.md"
+				}, {
+					"title" : "For package developers",
+					"url" : "doc/for_package_developers.md"
+				}, {
+					"title" : "For template developers",
+					"url" : "doc/for_template_developers.md"
+				}, {
+					"title" : "Advanced topics",
+					"url" : "doc/advanced.md"
+				}
+			]
+		}
 	}
 }
