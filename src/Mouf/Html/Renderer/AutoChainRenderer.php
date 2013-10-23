@@ -75,7 +75,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 		
 		$cacheKey = "chainRendererByClass_".$instanceName."/".get_class($object)."/".$context;
 		$rendererName = $this->cacheService->get($cacheKey);
-		if ($rendererName !== null) {
+		if ($rendererName != null) {
 			return MoufManager::getMoufManager()->getInstance($rendererName);
 		}
 		
