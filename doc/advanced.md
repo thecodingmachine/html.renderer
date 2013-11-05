@@ -25,8 +25,8 @@ the renderers to pick another renderer.
 
 In this exemple, the rendering engine will try to search for these files:
 
-- MyObject_mycontext.twig
-- MyObject_mycontext.php
+- MyObject__mycontext.twig (notice the double underscore)
+- MyObject__mycontext.php (notice the double underscore)
 - MyObject.twig
 - MyObject.php
 
