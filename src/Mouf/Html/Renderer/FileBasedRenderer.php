@@ -46,6 +46,8 @@ class FileBasedRenderer implements ChainableRendererInterface {
 
 	private $priority;
 	
+	private $tmpFileName;
+	
 	/**
 	 * 
 	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
@@ -108,11 +110,17 @@ class FileBasedRenderer implements ChainableRendererInterface {
 				} else {
 					$array = get_object_vars($object);
 				}
+				
+				// Let's store the filename into the object ($this) in order to avoid name conflict between
+				// the variables.
+				$this->tmpFileName = $fileName;
+				
+				extract($array);
 				// Let's create a local variable
-				foreach ($array as $var__tplt=>$value__tplt) {
+				/*foreach ($array as $var__tplt=>$value__tplt) {
 					$$var__tplt = $value__tplt;
-				}
-				include ROOT_PATH.$this->directory.'/'.$fileName['fileName'];
+				}*/
+				include ROOT_PATH.$this->directory.'/'.$this->tmpFileName['fileName'];
 			}
 		} else {
 			throw new MoufException("Cannot render object of class ".get_class($object).". No template found.");
