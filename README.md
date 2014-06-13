@@ -26,3 +26,15 @@ This package is part of Mouf (http://mouf-php.com), an effort to ensure good dev
 Basically, you will find in this package some **Renderers**. These are classes in charge of rendering other objects.
 They usually rely on *template files*, that contain the HTML to be rendered.
 Renderers can be *chained*, and the first renderer that knows how to render an object will be in charge of the rendering.
+
+Troubleshooting
+---------------
+
+Your template or a custom template is not apply.
+
+* Purge the cache with the red button in mouf.
+* You use Ajax and you return html with echo (for example BCE).
+	* By default an echo don't apply the template to make it
+		* add the defaultRenderer (a class of Mouf\Html\Renderer\AutoChainRenderer) in your class
+		* add your templateRenderer (a class of Mouf\Html\Renderer\FileBasedRenderer) in Bootstrap this is bootstrapRenderer
+		* add the code before your call to the function toHTML: $this->defaultRenderer->setTemplateRenderer($this->templateRenderer);
