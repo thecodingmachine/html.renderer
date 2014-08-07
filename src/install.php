@@ -34,6 +34,14 @@ $defaultRenderer->getProperty("cacheService")->setValue($rendererCacheService);
 if (!file_exists(ROOT_PATH.'src/templates')) {
 	$old = umask(0);
 	mkdir(ROOT_PATH.'src/templates', 0775, true);
+	// We add a default file in the templates directory in order to make sure the directory is commited in Git
+	// (Git does not support commiting empty directories)
+	file_put_contents(ROOT_PATH.'src/templates/README.txt', 'Templates directory
+===================
+			
+This directory contains the templates used to renderer compatible objects in your application.
+If you are not familiar with Mouf template mechanism, please have a look at the documentation:
+	http://mouf-php.com/packages/mouf/html.renderer/README.md');
 	umask($old);
 }
 
