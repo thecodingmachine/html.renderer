@@ -28,7 +28,7 @@ your package.
 If you are not used to install scripts
 --------------------------------------
 
-Here is a more details version of what you should do.
+Here is a more detailed version of what you should do.
 
 First, let's start by creating an install script in **src/install.php**
 
