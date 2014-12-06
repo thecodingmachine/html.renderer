@@ -54,7 +54,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 	public function render($object, $context = null) {
 		$renderer = $this->getRenderer($object, $context);
 		if ($renderer == null) {
-			throw new \Exception("Renderer not found. Unable to find renderer for object of class '".get_class($object)."'");
+			throw new \Exception("Renderer not found. Unable to find renderer for object of class '".get_class($object)."'. Path tested: ".$this->getRendererDebugMessage($object, $context));
 		}
 		$renderer->render($object, $context);
 	}
@@ -129,6 +129,68 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 		}
 		
 		return $foundRenderer;
+	}
+	
+	/**
+	 * Returns a string explaining the steps done to find the renderer.
+	 * 
+	 * @param object $object
+	 * @param string $context
+	 * @return string
+	 */
+	private function getRendererDebugMessage($object, $context = null) {
+		$debugMessage = '';
+		
+		$this->initRenderersList();
+		
+		$isCachable = true;
+		$foundRenderer = null;
+		
+		do {
+			foreach ($this->customRenderers as $renderer) {
+				/* @var $renderer ChainableRendererInterface */
+
+				$debugMessage .= $renderer->debugCanRender($object, $context);
+				$result = $renderer->canRender($object, $context);
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+					$isCachable = false;
+				}
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+					$foundRenderer = $renderer;
+					break 2;
+				}
+			}
+				
+			/* @var $renderer ChainableRendererInterface */
+			if ($this->templateRenderer) {
+				$debugMessage .= $this->templateRenderer->debugCanRender($object, $context);
+				$result = $this->templateRenderer->canRender($object, $context);
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+					$isCachable = false;
+				}
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+					$foundRenderer = $this->templateRenderer;
+					break;
+				}
+			}
+				
+			foreach ($this->packageRenderers as $renderer) {
+				/* @var $renderer ChainableRendererInterface */
+				
+				$debugMessage .= $renderer->debugCanRender($object, $context);
+				$result = $renderer->canRender($object, $context);
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+					$isCachable = false;
+				}
+				if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+					$foundRenderer = $renderer;
+					break 2;
+				}
+			}
+		
+		} while (false);
+		
+		return $debugMessage;
 	}
 	
 	private $instanceName;

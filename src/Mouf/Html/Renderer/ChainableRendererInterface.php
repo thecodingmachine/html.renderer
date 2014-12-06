@@ -39,6 +39,16 @@ interface ChainableRendererInterface extends RendererInterface {
 	function canRender($object, $context = null);
 	
 	/**
+	 * Returns a string explaining the steps taken to find a particular template.
+	 * The function goes through the steps used by "canRender" and returns a string explaining what was tested.
+	 * 
+	 * @param object $object
+	 * @param string $context
+	 * @return string
+	 */
+	function debugCanRender($object, $context = null);
+	
+	/**
 	 * Returns the renderer type.
 	 * This must by one of:
 	 *  - ChainableRendererInterface::TYPE_CUSTOM : a renderer used by the user (these renderers have the highest priority)

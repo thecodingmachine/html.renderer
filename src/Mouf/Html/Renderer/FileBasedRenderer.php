@@ -48,6 +48,10 @@ class FileBasedRenderer implements ChainableRendererInterface {
 	
 	private $tmpFileName;
 	
+	private $debugMode;
+	
+	private $debugStr;
+	
 	/**
 	 * 
 	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
@@ -84,6 +88,20 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		} else {
 			return ChainableRendererInterface::CANNOT_RENDER;
 		}
+	}
+	
+	/**
+	 * (non-PHPdoc)
+	 * @see \Mouf\Html\Renderer\ChainableRendererInterface::debugCanRender()
+	 */
+	public function debugCanRender($object, $context = null) {
+		$this->debugMode = true;
+		$this->debugStr = "Testing renderer '".MoufManager::getMoufManager()->findInstanceName($this)."'\n";
+		
+		$this->canRender($object, $context);
+		
+		$this->debugFalse = true;
+		return $this->debugStr;
 	}
 	
 	/**
@@ -141,11 +159,9 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		$cacheKey = $fullClassName.'/'.$context;
 
 		$cachedValue = $this->cacheService->get("FileBasedRenderer_".$this->directory.'/'.$cacheKey);
-		if ($cachedValue !== null) {
+		if ($cachedValue !== null && !$this->debugMode) {
 			return $cachedValue;
 		}
-		
-		$fileName = false;
 		
 		$baseFileName = str_replace('\\', '/', $fullClassName);
 		
@@ -183,20 +199,49 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		$baseFileName = str_replace('\\', '/', $className);
 		if ($context) {
 			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
+				if ($this->debugMode) {
+					$this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.twig'."\n";
+				}
 				return array("fileName"=>$baseFileName.'__'.$context.'.twig',
 					"type"=>"twig");
-			} elseif (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.php')) {
+			}
+			if ($this->debugMode) {
+				$this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.twig'."\n";
+			}
+				
+			if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.php')) {
+				if ($this->debugMode) {
+					$this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.php'."\n";
+				}
 				return array("fileName"=>$baseFileName.'__'.$context.'.php',
 					"type"=>"php");
 			}
+			if ($this->debugMode) {
+				$this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.php'."\n";
+			}
 		}
 		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
+			if ($this->debugMode) {
+				$this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'.twig'."\n";
+			}
 			return array("fileName"=>$baseFileName.'.twig',
 					"type"=>"twig");
-		} elseif (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.php')) {
+		}
+		if ($this->debugMode) {
+			$this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'.twig'."\n";
+		}
+		
+		if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.php')) {
+			if ($this->debugMode) {
+				$this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'.php'."\n";
+			}
 			return array("fileName"=>$baseFileName.'.php',
 					"type"=>"php");
 		}
+		if ($this->debugMode) {
+			$this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'.php'."\n";
+		}
+		
 		return false;
 	}
 	/* (non-PHPdoc)
