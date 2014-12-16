@@ -123,7 +123,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface {
 		
 		} while (false);
 		
-		if ($isCachable) {
+		if ($isCachable && $foundRenderer) {
 			// TODO: suboptimal
 			$this->cacheService->set($cacheKey, MoufManager::getMoufManager()->findInstanceName($foundRenderer));
 		}
