@@ -7,6 +7,7 @@
 
 namespace Mouf\Html\Renderer;
 
+use Interop\Container\ContainerInterface;
 use Mouf\Utils\Cache\CacheInterface;
 use Mouf\MoufException;
 use Mouf\Html\Renderer\Twig\MoufTwigExtension;
@@ -59,7 +60,7 @@ class FileBasedRenderer implements ChainableRendererInterface {
 	 * @param string $type The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
 	 * @param number $priority The priority of the renderer (within its type)
 	 */
-	public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0) {
+	public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0, ContainerInterface $container = null) {
 		$this->directory = trim($directory, '/\\');
 		$this->cacheService = $cacheService;
 		$this->type = $type;
@@ -72,7 +73,13 @@ class FileBasedRenderer implements ChainableRendererInterface {
 				'auto_reload' => true,
 				'debug' => true
 		));
-		$this->twig->addExtension(new MoufTwigExtension(MoufManager::getMoufManager()));
+
+		// Compatiblity with Mouf 2.0
+		if ($container === null) {
+			$container = MoufManager::getMoufManager();
+		}
+
+		$this->twig->addExtension(new MoufTwigExtension($container));
 		$this->twig->addExtension(new \Twig_Extension_Debug());
 	}
 
@@ -243,7 +250,8 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		}
 		
 		return false;
-	}
+	}
+
 	/* (non-PHPdoc)
 	 * @see \Mouf\Html\Renderer\ChainableRendererInterface::getRendererType()
 	 */

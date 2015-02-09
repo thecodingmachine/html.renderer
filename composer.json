@@ -24,7 +24,7 @@
 		"mouf/utils.cache.in-memory-cache" : "~1.0",
 		"php" : ">=5.4.4",
 		"mouf/html.htmlelement" : "~2.0",
-		"mouf/html.renderer.twig-extensions" : "~1.0"
+		"mouf/html.renderer.twig-extensions" : ">= 1.0.2, <2.0"
 	},
 	"autoload" : {
 		"psr-0" : {
