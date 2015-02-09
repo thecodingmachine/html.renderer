@@ -1,3 +1,6 @@
+[![Latest Stable Version](https://poser.pugx.org/mouf/html.renderer/v/stable.svg)](https://packagist.org/packages/mouf/html.renderer) [![Total Downloads](https://poser.pugx.org/mouf/html.renderer/downloads.svg)](https://packagist.org/packages/mouf/html.renderer) [![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable.svg)](https://packagist.org/packages/mouf/html.renderer) [![License](https://poser.pugx.org/mouf/html.renderer/license.svg)](https://packagist.org/packages/mouf/html.renderer) 
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/badges/quality-score.png?b=1.3)](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/?branch=1.3)
+
 What is this package?
 =====================
 
