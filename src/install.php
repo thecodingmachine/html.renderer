@@ -27,6 +27,7 @@ $customRenderer->getProperty("directory")->setValue("src/templates");
 $customRenderer->getProperty("cacheService")->setValue($rendererCacheService);
 $customRenderer->getProperty("type")->setValue(ChainableRendererInterface::TYPE_CUSTOM);
 $customRenderer->getProperty("priority")->setValue(0);
+$customRenderer->getProperty("twig")->setValue($moufManager->getInstanceDescriptor("twigEnvironment"));
 
 $defaultRenderer = InstallUtils::getOrCreateInstance("defaultRenderer", "Mouf\\Html\\Renderer\\AutoChainRenderer", $moufManager);
 $defaultRenderer->getProperty("cacheService")->setValue($rendererCacheService);

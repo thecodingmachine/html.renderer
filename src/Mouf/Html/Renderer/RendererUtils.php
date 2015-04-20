@@ -28,6 +28,7 @@ class RendererUtils {
 			$renderer->getProperty("cacheService")->setValue($moufManager->getInstanceDescriptor("rendererCacheService"));
 			$renderer->getProperty("type")->setValue(ChainableRendererInterface::TYPE_PACKAGE);
 			$renderer->getProperty("priority")->setValue($priority);
+            $renderer->getProperty("twig")->setValue($moufManager->getInstanceDescriptor("twigEnvironment"));
 		}
 	}
 }

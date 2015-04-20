@@ -51,29 +51,34 @@ class FileBasedRenderer implements ChainableRendererInterface {
 	private $debugMode;
 	
 	private $debugStr;
-	
-	/**
-	 * 
-	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
-	 * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
-	 * @param string $type The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
-	 * @param number $priority The priority of the renderer (within its type)
-	 */
-	public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0) {
+
+    /**
+     * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
+     * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
+     * @param string $type The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
+     * @param int $priority The priority of the renderer (within its type)
+     * @param \Twig_Environment $twig  The twig environment, which is optional (by default we will use the one from the twig librairy), but we will prefer the Mouf one.
+     */
+	public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0, \Twig_Environment $twig = null) {
 		$this->directory = trim($directory, '/\\');
 		$this->cacheService = $cacheService;
 		$this->type = $type;
 		$this->priority = $priority;
-		
-		$loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
-		$this->twig = new \Twig_Environment($loader, array(
-				// The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
-				'cache' => rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.str_replace(":", "", ROOT_PATH).$this->directory,
-				'auto_reload' => true,
-				'debug' => true
-		));
-		$this->twig->addExtension(new MoufTwigExtension(MoufManager::getMoufManager()));
-		$this->twig->addExtension(new \Twig_Extension_Debug());
+
+        if ($twig === null) {
+            $loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
+
+            $this->twig = new \Twig_Environment($loader, array(
+                // The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
+                'cache' => rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.str_replace(":", "", ROOT_PATH).$this->directory,
+                'auto_reload' => true,
+                'debug' => true
+            ));
+            $this->twig->addExtension(new MoufTwigExtension(MoufManager::getMoufManager()));
+            $this->twig->addExtension(new \Twig_Extension_Debug());
+        } else {
+            $this->twig = $twig;
+        }
 	}
 
 	/**
@@ -243,7 +248,8 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		}
 		
 		return false;
-	}
+	}
+
 	/* (non-PHPdoc)
 	 * @see \Mouf\Html\Renderer\ChainableRendererInterface::getRendererType()
 	 */
