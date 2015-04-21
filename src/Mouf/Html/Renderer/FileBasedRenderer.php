@@ -65,8 +65,8 @@ class FileBasedRenderer implements ChainableRendererInterface {
 		$this->type = $type;
 		$this->priority = $priority;
 
+        $loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
         if ($twig === null) {
-            $loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
 
             $this->twig = new \Twig_Environment($loader, array(
                 // The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
@@ -77,7 +77,10 @@ class FileBasedRenderer implements ChainableRendererInterface {
             $this->twig->addExtension(new MoufTwigExtension(MoufManager::getMoufManager()));
             $this->twig->addExtension(new \Twig_Extension_Debug());
         } else {
-            $this->twig = $twig;
+            // We need to modify the loader of the twig environment.
+            // Let's clone it.
+            $this->twig = clone $twig;
+            $this->twig->setLoader($loader);
         }
 	}
 
