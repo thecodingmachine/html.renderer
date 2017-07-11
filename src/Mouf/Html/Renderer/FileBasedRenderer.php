@@ -54,6 +54,8 @@ class FileBasedRenderer implements ChainableRendererInterface
 
     private $debugStr;
 
+    private $uniqueName;
+
     /**
      *
      * @param string         $directory    The directory of the templates, relative to the project root. Does not start and does not finish with a /
@@ -61,7 +63,7 @@ class FileBasedRenderer implements ChainableRendererInterface
      * @param string         $type         The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
      * @param number         $priority     The priority of the renderer (within its type)
      */
-    public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0, ContainerInterface $container = null)
+    public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0, ContainerInterface $container = null, string $uniqueName = null)
     {
         $this->directory = trim($directory, '/\\');
         $this->cacheService = $cacheService;
@@ -79,6 +81,12 @@ class FileBasedRenderer implements ChainableRendererInterface
         // Compatiblity with Mouf 2.0
         if ($container === null) {
             $container = MoufManager::getMoufManager();
+        }
+
+        if ($uniqueName === null) {
+            $this->uniqueName = MoufManager::getMoufManager()->findInstanceName($this);
+        } else {
+            $this->uniqueName = $uniqueName;
         }
 
         $this->twig->addExtension(new MoufTwigExtension($container));
@@ -107,7 +115,7 @@ class FileBasedRenderer implements ChainableRendererInterface
     public function debugCanRender($object, $context = null)
     {
         $this->debugMode = true;
-        $this->debugStr = "Testing renderer '".MoufManager::getMoufManager()->findInstanceName($this)."'\n";
+        $this->debugStr = "Testing renderer '".$this->getUniqueName()."'\n";
 
         $this->canRender($object, $context);
 
@@ -278,5 +286,16 @@ class FileBasedRenderer implements ChainableRendererInterface
     public function getPriority()
     {
         return $this->priority;
+    }
+
+    /**
+     * Returns a unique name for this renderer.
+     * Used for caching purposes.
+     *
+     * @return string
+     */
+    public function getUniqueName()
+    {
+        return $this->uniqueName;
     }
 }

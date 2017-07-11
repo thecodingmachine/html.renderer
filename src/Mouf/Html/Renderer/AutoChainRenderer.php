@@ -12,7 +12,6 @@ use Mouf\MoufManager;
 
 /**
  * This class is a renderer that renders objects using other renderers.
- * The other renderers must be declared in Mouf.
  * This renderer will automatically detect the renderers to be included.
  * They must extend the ChainableRendererInterface interface.
  *
@@ -22,29 +21,34 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
 {
 
     /**
-     * @var ChanableRendererInterface
+     * @var ChainableRendererInterface
      */
     private $templateRenderer;
     /**
-     * @var ChanableRendererInterface[]
+     * @var ChainableRendererInterface[]
      */
     private $packageRenderers = array();
     /**
-     * @var ChanableRendererInterface[]
+     * @var ChainableRendererInterface[]
      */
     private $customRenderers = array();
 
     private $cacheService;
 
     private $initDone = false;
+    /**
+     * @var string
+     */
+    private $uniqueName;
 
     /**
      *
      * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
      */
-    public function __construct(CacheInterface $cacheService)
+    public function __construct(CacheInterface $cacheService, string $uniqueName = 'autochain-renderer')
     {
         $this->cacheService = $cacheService;
+        $this->uniqueName = $uniqueName;
     }
 
     /**
@@ -74,21 +78,33 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
 
     private function getRenderer($object, $context = null)
     {
-        $instanceName = $this->getInstanceName();
+        $cacheKey = "chainRendererByClass_".$this->uniqueName."/".$this->templateRenderer->getUniqueName()."/".get_class($object)."/".$context;
 
-        $cacheKey = "chainRendererByClass_".$instanceName."/".$this->getTemplateRendererInstanceName()."/".get_class($object)."/".$context;
-        $rendererName = $this->cacheService->get($cacheKey);
-        if ($rendererName != null) {
-            return MoufManager::getMoufManager()->getInstance($rendererName);
+        $rendererSource = $this->cacheService->get($cacheKey);
+        if ($rendererSource != null) {
+            $source = $rendererSource['source'];
+            $rendererIndex = $rendererSource['index'];
+            switch ($source) {
+                case 'customRenderers':
+                    return $this->customRenderers[$rendererIndex];
+                case 'templateRenderer':
+                    return $this->templateRenderer;
+                case 'packageRenderers':
+                    return $this->packageRenderers[$rendererIndex];
+                default:
+                    throw new \RuntimeException('Unexpected renderer source: "'.$source.'"');
+            }
         }
 
         $this->initRenderersList();
 
         $isCachable = true;
         $foundRenderer = null;
+        $source = null;
+        $rendererIndex = null;
 
         do {
-            foreach ($this->customRenderers as $renderer) {
+            foreach ($this->customRenderers as $key => $renderer) {
                 /* @var $renderer ChainableRendererInterface */
                 $result = $renderer->canRender($object, $context);
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
@@ -96,6 +112,8 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
                 }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $renderer;
+                    $source = 'customRenderers';
+                    $rendererIndex = $key;
                     break 2;
                 }
             }
@@ -108,11 +126,12 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
                 }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $this->templateRenderer;
+                    $source = 'templateRenderer';
                     break;
                 }
             }
 
-            foreach ($this->packageRenderers as $renderer) {
+            foreach ($this->packageRenderers as $key => $renderer) {
                 /* @var $renderer ChainableRendererInterface */
                 $result = $renderer->canRender($object, $context);
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
@@ -120,14 +139,18 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
                 }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $renderer;
+                    $source = 'packageRenderers';
+                    $rendererIndex = $key;
                     break 2;
                 }
             }
         } while (false);
 
         if ($isCachable && $foundRenderer) {
-            // TODO: suboptimal
-            $this->cacheService->set($cacheKey, MoufManager::getMoufManager()->findInstanceName($foundRenderer));
+            $this->cacheService->set($cacheKey, [
+                'source' => $source,
+                'index' => $rendererIndex
+            ]);
         }
 
         return $foundRenderer;
@@ -146,7 +169,6 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
 
         $this->initRenderersList();
 
-        $isCachable = true;
         $foundRenderer = null;
 
         do {
@@ -155,11 +177,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
 
                 $debugMessage .= $renderer->debugCanRender($object, $context);
                 $result = $renderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
-                    $isCachable = false;
-                }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
-                    $foundRenderer = $renderer;
                     break 2;
                 }
             }
@@ -168,11 +186,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
             if ($this->templateRenderer) {
                 $debugMessage .= $this->templateRenderer->debugCanRender($object, $context);
                 $result = $this->templateRenderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
-                    $isCachable = false;
-                }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
-                    $foundRenderer = $this->templateRenderer;
                     break;
                 }
             }
@@ -182,46 +196,13 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
 
                 $debugMessage .= $renderer->debugCanRender($object, $context);
                 $result = $renderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
-                    $isCachable = false;
-                }
                 if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
-                    $foundRenderer = $renderer;
                     break 2;
                 }
             }
         } while (false);
 
         return $debugMessage;
-    }
-
-    private $instanceName;
-
-    private function getInstanceName()
-    {
-        if ($this->instanceName !== null) {
-            return $this->instanceName;
-        }
-        $moufManager = MoufManager::getMoufManager();
-        // TODO: suboptimal. findInstanceName is not efficient.
-        $this->instanceName = $moufManager->findInstanceName($this);
-
-        return $this->instanceName;
-    }
-
-    private $templateRendererInstanceName;
-
-    private function getTemplateRendererInstanceName() {
-        if ($this->templateRendererInstanceName !== null) {
-            return $this->templateRendererInstanceName;
-        }
-        if ($this->templateRenderer === null) {
-            return "";
-        }
-        $moufManager = MoufManager::getMoufManager();
-        // TODO: suboptimal. findInstanceName is not efficient.
-        $this->templateRendererInstanceName = $moufManager->findInstanceName($this->templateRenderer);
-        return $this->templateRendererInstanceName;
     }
 
     /**
@@ -231,12 +212,11 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
     {
         if (!$this->initDone) {
             $moufManager = MoufManager::getMoufManager();
-            // TODO: suboptimal. findInstanceName is not efficient.
-            $instanceName = $this->getInstanceName();
-            $renderersList = $this->cacheService->get("chainRenderer_".$instanceName);
+
+            $renderersList = $this->cacheService->get("chainRenderer_".$this->uniqueName);
             if ($renderersList === null) {
                 $renderersList = $this->queryRenderersList();
-                $this->cacheService->set("chainRenderer_".$instanceName, $renderersList);
+                $this->cacheService->set("chainRenderer_".$this->uniqueName, $renderersList);
             }
 
             if (isset($renderersList[ChainableRendererInterface::TYPE_CUSTOM])) {
@@ -264,6 +244,12 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
      */
     private function queryRenderersList()
     {
+        // TODO: new major release!!!
+        // Let's get rid of this autodiscovery crap and let's build a true framework agnostic package.
+        // Instead, let's build a service-provider utility class that can add a renderer to the main AutoChainRenderer!
+        // Also, let's base this on the cms-interface/RendererInterface
+        // Finally, we can have a 'selfRenderable' trait that renders itself ???
+
         $moufManager = MoufManager::getMoufManager();
         $renderersNames = $moufManager->findInstances('Mouf\\Html\\Renderer\\ChainableRendererInterface');
 

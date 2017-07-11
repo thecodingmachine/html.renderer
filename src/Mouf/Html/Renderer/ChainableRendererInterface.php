@@ -67,4 +67,12 @@ interface ChainableRendererInterface extends RendererInterface
      * @return number
      */
     public function getPriority();
+
+    /**
+     * Returns a unique name for this renderer.
+     * Used for caching purposes.
+     *
+     * @return string
+     */
+    public function getUniqueName();
 }
