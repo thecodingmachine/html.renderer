@@ -20,7 +20,7 @@
 	],
 	"require" : {
 		"mouf/utils.cache.apc-cache" : "~2.0",
-		"twig/twig" : "1.*@stable",
+		"twig/twig" : "^1 || ^2",
 		"mouf/utils.cache.in-memory-cache" : "~1.0",
 		"php" : ">=5.4.4",
 		"mouf/html.htmlelement" : "~2.0",
