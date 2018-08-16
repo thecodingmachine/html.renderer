@@ -55,7 +55,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
      * (non-PHPdoc)
      * @see \Mouf\Html\Renderer\RendererInterface::render()
      */
-    public function render($object, $context = null)
+    public function render($object, string $context = null): void
     {
         $renderer = $this->getRenderer($object, $context);
         if ($renderer == null) {

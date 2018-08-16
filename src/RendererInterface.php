@@ -21,5 +21,5 @@ interface RendererInterface
      * @param object $object  The object to render
      * @param string $context A string representing a context that might be used to choose another renderer for the object.
      */
-    public function render($object, $context = null);
+    public function render($object, string $context = null): void;
 }

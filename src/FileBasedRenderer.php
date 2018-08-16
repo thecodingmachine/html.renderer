@@ -54,10 +54,8 @@ class FileBasedRenderer implements ChainableRendererInterface
 	 * 
 	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
 	 * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
-	 * @param string $type The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
-	 * @param number $priority The priority of the renderer (within its type)
 	 */
-    public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container, Twig $twig = null)
+    public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container, \Twig_Environment $twig = null)
     {
         $this->directory = $directory;
         $this->cacheService = $cacheService;
@@ -124,7 +122,7 @@ class FileBasedRenderer implements ChainableRendererInterface
      * (non-PHPdoc)
      * @see \Mouf\Html\Renderer\RendererInterface::render()
      */
-    public function render($object, $context = null)
+    public function render($object, string $context = null): void
     {
         $fileName = $this->getTemplateFileName($object, $context);
 
