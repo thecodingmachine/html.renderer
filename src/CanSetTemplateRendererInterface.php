@@ -22,5 +22,5 @@ interface CanSetTemplateRendererInterface extends RendererInterface
      *
      * @param RendererInterface $templateRenderer
      */
-    public function setTemplateRenderer(RendererInterface $templateRenderer);
+    public function setTemplateRenderer(RendererInterface $templateRenderer): void;
 }

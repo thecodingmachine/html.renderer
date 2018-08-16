@@ -71,7 +71,7 @@ class AutoChainRenderer implements CanSetTemplateRendererInterface
      *
      * @param RendererInterface $templateRenderer
      */
-    public function setTemplateRenderer(RendererInterface $templateRenderer)
+    public function setTemplateRenderer(RendererInterface $templateRenderer): void
     {
         $this->templateRenderer = $templateRenderer;
     }
