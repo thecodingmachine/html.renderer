@@ -18,7 +18,7 @@
 	"license" : "MIT",
 	"require" : {
 		"mouf/utils.cache.apc-cache" : "~2.0",
-		"twig/twig" : "1.*@stable",
+		"twig/twig" : "^1 || ^2",
 		"php" : ">=7.1",
 		"mouf/html.htmlelement" : "~2.0",
 		"mouf/html.renderer.twig-extensions" : ">= 1.0.2, <2.0",
