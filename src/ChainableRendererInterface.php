@@ -48,31 +48,4 @@ interface ChainableRendererInterface extends RendererInterface
      * @return string
      */
     public function debugCanRender($object, $context = null);
-
-    /**
-     * Returns the renderer type.
-     * This must by one of:
-     *  - ChainableRendererInterface::TYPE_CUSTOM : a renderer used by the user (these renderers have the highest priority)
-     *  - ChainableRendererInterface::TYPE_TEMPLATE : a renderer used by a template. These renderers are usually included when
-     *    a template's toHtml method is triggered. They are therefore not automatically included in the AutoChainRenderer
-     *  - ChainableRendererInterface::TYPE_PACKAGE : a renderer used by a package. These have the lowest priority.
-     *
-     * @return string
-     */
-    public function getRendererType();
-
-    /**
-     * Returns the priority for the template. The higher the number, the higher the priority.
-     *
-     * @return number
-     */
-    public function getPriority();
-
-    /**
-     * Returns a unique name for this renderer.
-     * Used for caching purposes.
-     *
-     * @return string
-     */
-    public function getUniqueName();
 }

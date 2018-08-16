@@ -7,11 +7,11 @@
 
 namespace Mouf\Html\Renderer;
 
-use Interop\Container\ContainerInterface;
-use Mouf\Utils\Cache\CacheInterface;
+use Psr\Container\ContainerInterface;
 use Mouf\MoufException;
 use Mouf\Html\Renderer\Twig\MoufTwigExtension;
 use Mouf\MoufManager;
+use Psr\SimpleCache\CacheInterface;
 
 /**
  * This class is a renderer that renders objects using a directory containing template files.
@@ -44,50 +44,29 @@ class FileBasedRenderer implements ChainableRendererInterface
 
     private $twig;
 
-    private $type;
-
-    private $priority;
-
     private $tmpFileName;
 
     private $debugMode;
 
     private $debugStr;
 
-    private $uniqueName;
-
     /**
      *
      * @param string         $directory    The directory of the templates, relative to the project root. Does not start and does not finish with a /
      * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
-     * @param string         $type         The type of the renderer. Should be one of "custom", "template" or "package". Defaults to "custom" (see ChainableRendererInterface for more details)
-     * @param number         $priority     The priority of the renderer (within its type)
      */
-    public function __construct($directory = "src/templates", CacheInterface $cacheService = null, $type = "custom", $priority = 0, ContainerInterface $container = null, string $uniqueName = null)
+    public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container)
     {
-        $this->directory = trim($directory, '/\\');
+        $this->directory = $directory;
         $this->cacheService = $cacheService;
-        $this->type = $type;
-        $this->priority = $priority;
 
-        $loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
+        $loader = new \Twig_Loader_Filesystem($this->directory);
         $this->twig = new \Twig_Environment($loader, array(
                 // The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
-                'cache' => rtrim(sys_get_temp_dir(), '/\\').'/mouftwigtemplatemain_'.str_replace(":", "", ROOT_PATH).$this->directory,
+                'cache' => rtrim(sys_get_temp_dir(), '/\\').'/mouftwigtemplatemain_'.str_replace(":", "", $this->directory),
                 'auto_reload' => true,
                 'debug' => true,
         ));
-
-        // Compatiblity with Mouf 2.0
-        if ($container === null) {
-            $container = MoufManager::getMoufManager();
-        }
-
-        if ($uniqueName === null) {
-            $this->uniqueName = MoufManager::getMoufManager()->findInstanceName($this);
-        } else {
-            $this->uniqueName = $uniqueName;
-        }
 
         $this->twig->addExtension(new MoufTwigExtension($container));
         $this->twig->addExtension(new \Twig_Extension_Debug());
@@ -115,11 +94,11 @@ class FileBasedRenderer implements ChainableRendererInterface
     public function debugCanRender($object, $context = null)
     {
         $this->debugMode = true;
-        $this->debugStr = "Testing renderer '".$this->getUniqueName()."'\n";
+        $this->debugStr = "Testing renderer for directory '".$this->directory."'\n";
 
         $this->canRender($object, $context);
 
-        $this->debugFalse = true;
+        $this->debugMode = false;
 
         return $this->debugStr;
     }
@@ -133,23 +112,17 @@ class FileBasedRenderer implements ChainableRendererInterface
         $fileName = $this->getTemplateFileName($object, $context);
 
         if ($fileName != false) {
+            if (method_exists($object, 'getPrivateProperties')) {
+                $array = $object->getPrivateProperties();
+            } else {
+                $array = get_object_vars($object);
+            }
             if ($fileName['type'] == 'twig') {
-                if (method_exists($object, 'getPrivateProperties')) {
-                    $array = $object->getPrivateProperties();
-                } else {
-                    $array = get_object_vars($object);
-                }
                 if (!isset($array['this'])) {
                     $array['this'] = $object;
                 }
                 echo $this->twig->render($fileName['fileName'], $array);
             } else {
-                if (method_exists($object, 'getPrivateProperties')) {
-                    $array = $object->getPrivateProperties();
-                } else {
-                    $array = get_object_vars($object);
-                }
-
                 // Let's store the filename into the object ($this) in order to avoid name conflict between
                 // the variables.
                 $this->tmpFileName = $fileName;
@@ -159,10 +132,10 @@ class FileBasedRenderer implements ChainableRendererInterface
                 /*foreach ($array as $var__tplt=>$value__tplt) {
                     $$var__tplt = $value__tplt;
                 }*/
-                include ROOT_PATH.$this->directory.'/'.$this->tmpFileName['fileName'];
+                include $this->directory.'/'.$this->tmpFileName['fileName'];
             }
         } else {
-            throw new MoufException("Cannot render object of class ".get_class($object).". No template found.");
+            throw new NoTemplateFoundException("Cannot render object of class ".get_class($object).". No template found.");
         }
     }
 
@@ -171,21 +144,19 @@ class FileBasedRenderer implements ChainableRendererInterface
      *
      * @param  object      $object
      * @param  string      $context
-     * @return string|bool
+     * @return array<string,string>|null An array with 2 keys: "filename" and "type", or null if nothing found
      */
-    private function getTemplateFileName($object, $context = null)
+    private function getTemplateFileName($object, ?string $context = null): ?array
     {
         $fullClassName = get_class($object);
 
         // Optimisation: let's see if we already performed the file_exists checks.
-        $cacheKey = $fullClassName.'/'.$context;
+        $cacheKey = md5("FileBasedRenderer_".$this->directory.'/'.$fullClassName.'/'.$context);
 
-        $cachedValue = $this->cacheService->get("FileBasedRenderer_".$this->directory.'/'.$cacheKey);
+        $cachedValue = $this->cacheService->get($cacheKey);
         if ($cachedValue !== null && !$this->debugMode) {
             return $cachedValue;
         }
-
-        $baseFileName = str_replace('\\', '/', $fullClassName);
 
         $fileName = $this->findFile($fullClassName, $context);
         $parentClass = $fullClassName;
@@ -212,16 +183,21 @@ class FileBasedRenderer implements ChainableRendererInterface
             }
         }
 
-        $this->cacheService->set("FileBasedRenderer_".$this->directory.'/'.$cacheKey, $fileName);
+        $this->cacheService->set($cacheKey, $fileName);
 
         return $fileName;
     }
 
-    private function findFile($className, $context)
+    /**
+     * @param string $className
+     * @param null|string $context
+     * @return array<string,string>|null An array with 2 keys: "filename" and "type", or null if nothing found
+     */
+    private function findFile(string $className, ?string $context): ?array
     {
         $baseFileName = str_replace('\\', '/', $className);
         if ($context) {
-            if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
+            if (file_exists($this->directory.'/'.$baseFileName.'__'.$context.'.twig')) {
                 if ($this->debugMode) {
                     $this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.twig'."\n";
                 }
@@ -233,7 +209,7 @@ class FileBasedRenderer implements ChainableRendererInterface
                 $this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.twig'."\n";
             }
 
-            if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'__'.$context.'.php')) {
+            if (file_exists($this->directory.'/'.$baseFileName.'__'.$context.'.php')) {
                 if ($this->debugMode) {
                     $this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.php'."\n";
                 }
@@ -245,7 +221,7 @@ class FileBasedRenderer implements ChainableRendererInterface
                 $this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'__'.$context.'.php'."\n";
             }
         }
-        if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.twig')) {
+        if (file_exists($this->directory.'/'.$baseFileName.'.twig')) {
             if ($this->debugMode) {
                 $this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'.twig'."\n";
             }
@@ -257,7 +233,7 @@ class FileBasedRenderer implements ChainableRendererInterface
             $this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'.twig'."\n";
         }
 
-        if (file_exists(ROOT_PATH.$this->directory.'/'.$baseFileName.'.php')) {
+        if (file_exists($this->directory.'/'.$baseFileName.'.php')) {
             if ($this->debugMode) {
                 $this->debugStr .= "  Found file: ".$this->directory.'/'.$baseFileName.'.php'."\n";
             }
@@ -269,33 +245,6 @@ class FileBasedRenderer implements ChainableRendererInterface
             $this->debugStr .= "  Tested file: ".$this->directory.'/'.$baseFileName.'.php'."\n";
         }
 
-        return false;
-    }
-
-    /* (non-PHPdoc)
-     * @see \Mouf\Html\Renderer\ChainableRendererInterface::getRendererType()
-     */
-    public function getRendererType()
-    {
-        return $this->type;
-    }
-
-    /* (non-PHPdoc)
-     * @see \Mouf\Html\Renderer\ChainableRendererInterface::getPriority()
-     */
-    public function getPriority()
-    {
-        return $this->priority;
-    }
-
-    /**
-     * Returns a unique name for this renderer.
-     * Used for caching purposes.
-     *
-     * @return string
-     */
-    public function getUniqueName()
-    {
-        return $this->uniqueName;
+        return null;
     }
 }
