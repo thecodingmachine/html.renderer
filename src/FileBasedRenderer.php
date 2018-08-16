@@ -62,13 +62,13 @@ class FileBasedRenderer implements ChainableRendererInterface
         $this->directory = $directory;
         $this->cacheService = $cacheService;
 
-        $loader = new \Twig_Loader_Filesystem(ROOT_PATH.$this->directory);
+        $loader = new \Twig_Loader_Filesystem($this->directory);
         if (function_exists('posix_geteuid')) {
             $posixGetuid = posix_geteuid();
         } else {
             $posixGetuid = '';
         }
-        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.str_replace(":", "", ROOT_PATH).$this->directory);
+        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.$this->directory);
         if ($twig === null) {
 
             $this->twig = new \Twig_Environment($loader, array(
