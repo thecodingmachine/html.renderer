@@ -20,7 +20,7 @@ interface CanSetTemplateRendererInterface extends RendererInterface
      * There should be only one if these renderers.
      * It is the role of the template to subscribe to this renderer.
      *
-     * @param RendererInterface $templateRenderer
+     * @param string $templateRendererInstanceName The name of the template renderer in the container
      */
-    public function setTemplateRenderer(RendererInterface $templateRenderer): void;
+    public function setTemplateRendererInstanceName(string $templateRendererInstanceName): void;
 }

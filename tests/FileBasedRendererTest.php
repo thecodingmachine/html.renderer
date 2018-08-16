@@ -6,9 +6,8 @@ use Mouf\Html\Renderer\Fixtures\ExtendedFoo;
 use Mouf\Html\Renderer\Fixtures\Foo;
 use Mouf\Html\Renderer\Fixtures\MyImplementation;
 use PHPUnit\Framework\TestCase;
-use Psr\Container\ContainerExceptionInterface;
 use Interop\Container\ContainerInterface;
-use Psr\Container\NotFoundExceptionInterface;
+use Simplex\Container;
 use Symfony\Component\Cache\Simple\ArrayCache;
 
 class FileBasedRendererTest extends TestCase
@@ -18,16 +17,7 @@ class FileBasedRendererTest extends TestCase
         $renderer = new FileBasedRenderer(
             'tests/templates',
             new ArrayCache(),
-            new class implements ContainerInterface {
-                public function get($id)
-                {
-                    return '';
-                }
-                public function has($id)
-                {
-                    return true;
-                }
-            }
+            new Container()
         );
 
         $canRender = $renderer->canRender(new Foo());

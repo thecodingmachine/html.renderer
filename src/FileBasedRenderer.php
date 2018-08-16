@@ -66,7 +66,7 @@ class FileBasedRenderer implements ChainableRendererInterface
         } else {
             $posixGetuid = '';
         }
-        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.$this->directory);
+        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.\realpath($this->directory));
         if ($twig === null) {
 
             $this->twig = new \Twig_Environment($loader, array(
@@ -91,7 +91,7 @@ class FileBasedRenderer implements ChainableRendererInterface
      * (non-PHPdoc)
      * @see \Mouf\Html\Renderer\RendererInterface::canRender()
      */
-    public function canRender($object, $context = null)
+    public function canRender($object, string $context = null): int
     {
         $fileName = $this->getTemplateFileName($object, $context);
 
@@ -106,7 +106,7 @@ class FileBasedRenderer implements ChainableRendererInterface
      * (non-PHPdoc)
      * @see \Mouf\Html\Renderer\ChainableRendererInterface::debugCanRender()
      */
-    public function debugCanRender($object, $context = null)
+    public function debugCanRender($object, string $context = null): string
     {
         $this->debugMode = true;
         $this->debugStr = "Testing renderer for directory '".$this->directory."'\n";

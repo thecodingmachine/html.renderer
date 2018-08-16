@@ -37,7 +37,7 @@ interface ChainableRendererInterface extends RendererInterface
      * @param  string $context
      * @return int
      */
-    public function canRender($object, $context = null);
+    public function canRender($object, string $context = null): int;
 
     /**
      * Returns a string explaining the steps taken to find a particular template.
@@ -47,5 +47,5 @@ interface ChainableRendererInterface extends RendererInterface
      * @param  string $context
      * @return string
      */
-    public function debugCanRender($object, $context = null);
+    public function debugCanRender($object, string $context = null): string;
 }
