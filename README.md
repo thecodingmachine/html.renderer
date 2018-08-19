@@ -1,4 +1,4 @@
-[![Latest Stable Version](https://poser.pugx.org/mouf/html.renderer/v/stable.svg)](https://packagist.org/packages/mouf/html.renderer) [![Total Downloads](https://poser.pugx.org/mouf/html.renderer/downloads.svg)](https://packagist.org/packages/mouf/html.renderer) [![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable.svg)](https://packagist.org/packages/mouf/html.renderer) [![License](https://poser.pugx.org/mouf/html.renderer/license.svg)](https://packagist.org/packages/mouf/html.renderer) 
+[![Latest Stable Version](https://poser.pugx.org/mouf/html.renderer/v/stable.svg)](https://packagist.org/packages/mouf/html.renderer)
 [![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable)](https://packagist.org/packages/mouf/html.renderer)
 [![License](https://poser.pugx.org/mouf/html.renderer/license)](https://packagist.org/packages/mouf/html.renderer)
 [![Build Status](https://travis-ci.org/mouf/html.renderer.svg?branch=2.0)](https://travis-ci.org/mouf/html.renderer)
