@@ -8,9 +8,7 @@
 namespace Mouf\Html\Renderer;
 
 use Psr\Container\ContainerInterface;
-use Mouf\MoufException;
 use Mouf\Html\Renderer\Twig\MoufTwigExtension;
-use Mouf\MoufManager;
 use Psr\SimpleCache\CacheInterface;
 
 /**
