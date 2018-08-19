@@ -89,9 +89,9 @@ class ChainRenderer implements CanSetTemplateRendererInterface
     /**
      * @param object $object
      * @param string|null $context
-     * @return ChainableRendererInterface
+     * @return ChainableRendererInterface|null
      */
-    private function getRenderer($object, string $context = null): ChainableRendererInterface
+    private function getRenderer($object, string $context = null): ?ChainableRendererInterface
     {
         $cacheKey = "chainRendererByClass_".md5($this->uniqueName."/".$this->templateRendererInstanceName."/".get_class($object)."/".$context);
 
@@ -110,10 +110,10 @@ class ChainRenderer implements CanSetTemplateRendererInterface
         do {
             foreach ($this->customRenderers as $instanceName => $renderer) {
                 $result = $renderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
                     $isCachable = false;
                 }
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $renderer;
                     $foundInstanceName = $instanceName;
                     break 2;
@@ -125,10 +125,10 @@ class ChainRenderer implements CanSetTemplateRendererInterface
             }
             if ($this->templateRenderer) {
                 $result = $this->templateRenderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
                     $isCachable = false;
                 }
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $this->templateRenderer;
                     break;
                 }
@@ -136,10 +136,10 @@ class ChainRenderer implements CanSetTemplateRendererInterface
 
             foreach ($this->packageRenderers as $instanceName => $renderer) {
                 $result = $renderer->canRender($object, $context);
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CANNOT_RENDER_OBJECT) {
                     $isCachable = false;
                 }
-                if ($result == ChainableRendererInterface::CAN_RENDER_OBJECT || $result == ChainableRendererInterface::CAN_RENDER_CLASS) {
+                if ($result === ChainableRendererInterface::CAN_RENDER_OBJECT || $result === ChainableRendererInterface::CAN_RENDER_CLASS) {
                     $foundRenderer = $renderer;
                     $foundInstanceName = $instanceName;
                     break 2;

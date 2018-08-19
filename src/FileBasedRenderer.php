@@ -49,7 +49,9 @@ class FileBasedRenderer implements ChainableRendererInterface
 	private $debugMode;
 	
 	private $debugStr;
-	
+
+	private $noDirectory = false;
+
 	/**
 	 * 
 	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
@@ -57,6 +59,10 @@ class FileBasedRenderer implements ChainableRendererInterface
 	 */
     public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container, \Twig_Environment $twig = null)
     {
+        if (!\is_dir($directory)) {
+            $this->noDirectory = true;
+            return;
+        }
         $this->directory = $directory;
         $this->cacheService = $cacheService;
 
@@ -93,6 +99,9 @@ class FileBasedRenderer implements ChainableRendererInterface
      */
     public function canRender($object, string $context = null): int
     {
+        if ($this->noDirectory) {
+            return ChainableRendererInterface::CANNOT_RENDER;
+        }
         $fileName = $this->getTemplateFileName($object, $context);
 
         if ($fileName) {
@@ -108,6 +117,9 @@ class FileBasedRenderer implements ChainableRendererInterface
      */
     public function debugCanRender($object, string $context = null): string
     {
+        if ($this->noDirectory) {
+            return sprintf('Directory "%s" does not exists. Renderer disabled.', $this->directory);
+        }
         $this->debugMode = true;
         $this->debugStr = "Testing renderer for directory '".$this->directory."'\n";
 
@@ -124,6 +136,9 @@ class FileBasedRenderer implements ChainableRendererInterface
      */
     public function render($object, string $context = null): void
     {
+        if ($this->noDirectory) {
+            throw new NoTemplateFoundException("Cannot render object of class ".get_class($object). '. Directory ' .$this->directory.' does not exists.');
+        }
         $fileName = $this->getTemplateFileName($object, $context);
 
         if ($fileName != false) {

@@ -2,8 +2,6 @@
 
 namespace Mouf\Html\Renderer;
 
-use Mouf;
-use Mouf\RootContainer;
 
 /**
  * Classes using this trait will have an automatic implementation of the toHtml method provided that
@@ -40,6 +38,6 @@ trait Renderable
 
     public function toHtml()
     {
-        RootContainer::get('defaultRenderer')->render($this, $this->context);
+        RendererFacade::render($this, $this->context);
     }
 }
