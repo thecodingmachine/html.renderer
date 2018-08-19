@@ -5,8 +5,8 @@ matrix:
     env: PREFER_LOWEST=""
   - php: 7.1
     env: PREFER_LOWEST=""
-  - php: 7.1
-    env: PREFER_LOWEST="--prefer-lowest"
+#  - php: 7.1
+#    env: PREFER_LOWEST="--prefer-lowest"
 
 before_script:
 - composer update $PREFER_LOWEST --no-interaction
