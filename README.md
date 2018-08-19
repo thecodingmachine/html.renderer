@@ -2,8 +2,8 @@
 [![Total Downloads](https://poser.pugx.org/mouf/html.renderer/downloads.svg)](https://packagist.org/packages/mouf/html.renderer)
 [![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable)](https://packagist.org/packages/mouf/html.renderer)
 [![License](https://poser.pugx.org/mouf/html.renderer/license)](https://packagist.org/packages/mouf/html.renderer)
-[![Build Status](https://travis-ci.org/mouf/html.renderer.svg?branch=2.0)](https://travis-ci.org/mouf/html.renderer)
-[![Coverage Status](https://coveralls.io/repos/mouf/html.renderer/badge.svg?branch=2.0&service=github)](https://coveralls.io/github/mouf/html.renderer?branch=2.0)
+[![Build Status](https://travis-ci.org/thecodingmachine/html.renderer.svg?branch=2.0)](https://travis-ci.org/thecodingmachine/html.renderer)
+[![Coverage Status](https://coveralls.io/repos/thecodingmachine/html.renderer/badge.svg?branch=2.0&service=github)](https://coveralls.io/github/thecodingmachine/html.renderer?branch=2.0)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/badges/quality-score.png?b=2.0)](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/?branch=2.0)
 
 What is this package?
