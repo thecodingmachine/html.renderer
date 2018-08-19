@@ -3,8 +3,8 @@
 
 namespace Mouf\Html\Renderer;
 
-use Interop\Container\ServiceProviderInterface;
-use PHPStan\Cache\Cache;
+use TheCodingMachine\MiddlewareListServiceProvider;
+use TheCodingMachine\MiddlewareOrder;
 use Psr\Container\ContainerInterface;
 use Psr\SimpleCache\CacheInterface;
 use TheCodingMachine\Funky\Annotations\Factory;
@@ -56,5 +56,13 @@ class RendererServiceProvider extends ServiceProvider
     public static function createCustomRenderers(): \SplPriorityQueue
     {
         return new \SplPriorityQueue();
+    }
+
+    /**
+     * @Factory(tags={@Tag(name=MiddlewareListServiceProvider::MIDDLEWARES_QUEUE, priority=MiddlewareOrder::UTILITY_EARLY)})
+     */
+    public static function createMiddleware(RendererInterface $renderer): InitRendererFacadeMiddleware
+    {
+        return new InitRendererFacadeMiddleware($renderer);
     }
 }
