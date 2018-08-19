@@ -13,7 +13,7 @@ before_script:
 - mkdir -p build/logs
 script:
 - "./vendor/bin/phpunit"
-- "./vendor/bin/composer-require-checker"
+- "./vendor/bin/composer-require-checker --config-file=composer-require-checker.json"
 - composer cs-check
 - composer phpstan
 after_script:
