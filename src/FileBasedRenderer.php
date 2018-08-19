@@ -59,11 +59,11 @@ class FileBasedRenderer implements ChainableRendererInterface
      */
     public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container, \Twig_Environment $twig = null)
     {
+        $this->directory = $directory;
         if (!\is_dir($directory)) {
             $this->noDirectory = true;
             return;
         }
-        $this->directory = $directory;
         $this->cacheService = $cacheService;
 
         $loader = new \Twig_Loader_Filesystem($this->directory);
@@ -116,12 +116,12 @@ class FileBasedRenderer implements ChainableRendererInterface
      */
     public function debugCanRender($object, string $context = null): string
     {
-        if ($this->noDirectory) {
-            return sprintf('Directory "%s" does not exists. Renderer disabled.', $this->directory);
-        }
-        $this->debugMode = true;
         $this->debugStr = "Testing renderer for directory '".$this->directory."'\n";
+        if ($this->noDirectory) {
+            return sprintf("Directory '%s' does not exists. Renderer disabled.\n", $this->directory);
+        }
 
+        $this->debugMode = true;
         $this->canRender($object, $context);
 
         $this->debugMode = false;
