@@ -2,7 +2,6 @@
 
 namespace Mouf\Html\Renderer;
 
-
 /**
  * Classes using this trait will have an automatic implementation of the toHtml method provided that
  * will call the default rendering system.

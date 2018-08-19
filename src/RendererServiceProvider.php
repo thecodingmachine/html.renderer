@@ -3,7 +3,6 @@
 
 namespace Mouf\Html\Renderer;
 
-
 use Interop\Container\ServiceProviderInterface;
 use PHPStan\Cache\Cache;
 use Psr\Container\ContainerInterface;
@@ -23,11 +22,13 @@ class RendererServiceProvider extends ServiceProvider
      */
     public static function createChainRenderer(ContainerInterface $container, CacheInterface $cache): ChainRenderer
     {
-        return new ChainRenderer($container,
+        return new ChainRenderer(
+            $container,
             \iterator_to_array($container->get('customRenderers')),
             \iterator_to_array($container->get('packageRenderers')),
             $cache,
-            'chainRenderer');
+            'chainRenderer'
+        );
     }
 
     /**

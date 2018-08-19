@@ -44,19 +44,19 @@ class FileBasedRenderer implements ChainableRendererInterface
 
     private $twig;
 
-	private $tmpFileName;
-	
-	private $debugMode;
-	
-	private $debugStr;
+    private $tmpFileName;
+    
+    private $debugMode;
+    
+    private $debugStr;
 
-	private $noDirectory = false;
+    private $noDirectory = false;
 
-	/**
-	 * 
-	 * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
-	 * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
-	 */
+    /**
+     *
+     * @param string $directory The directory of the templates, relative to the project root. Does not start and does not finish with a /
+     * @param CacheInterface $cacheService This service is used to speed up the mapping between the object and the template.
+     */
     public function __construct(string $directory, CacheInterface $cacheService, ContainerInterface $container, \Twig_Environment $twig = null)
     {
         if (!\is_dir($directory)) {
@@ -72,9 +72,8 @@ class FileBasedRenderer implements ChainableRendererInterface
         } else {
             $posixGetuid = '';
         }
-        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(),'/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.\realpath($this->directory));
+        $cacheFilesystem = new \Twig_Cache_Filesystem(rtrim(sys_get_temp_dir(), '/\\').'/mouftwigtemplatemain_'.$posixGetuid.'_'.\realpath($this->directory));
         if ($twig === null) {
-
             $this->twig = new \Twig_Environment($loader, array(
                 // The cache directory is in the temporary directory and reproduces the path to the directory (to avoid cache conflict between apps).
                 'cache' => $cacheFilesystem,
@@ -91,7 +90,7 @@ class FileBasedRenderer implements ChainableRendererInterface
             $this->twig->setCache($cacheFilesystem);
             $this->twig->setCompiler(new \Twig_Compiler($this->twig));
         }
-	}
+    }
 
     /**
      * (non-PHPdoc)

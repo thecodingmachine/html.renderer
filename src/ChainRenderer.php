@@ -196,16 +196,16 @@ class ChainRenderer implements CanSetTemplateRendererInterface
                     break 2;
                 }
             }
-
         } while (false);
-		
-		return $debugMessage;
-	}
-	
-	/**
-	 * Initializes the renderers list (from cache if available)
-	 */
-	private function initRenderersList(): void {
+        
+        return $debugMessage;
+    }
+    
+    /**
+     * Initializes the renderers list (from cache if available)
+     */
+    private function initRenderersList(): void
+    {
         if (!$this->initDone) {
             foreach ($this->customRendererInstanceNames as $instanceName) {
                 $this->customRenderers[$instanceName] = $this->container->get($instanceName);
@@ -217,7 +217,7 @@ class ChainRenderer implements CanSetTemplateRendererInterface
             // Note: We ignore template renderers on purpose.
             $this->initDone = true;
         }
-	}
+    }
 
     /**
      * Sets the renderer associated to the template.
