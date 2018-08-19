@@ -1,5 +1,9 @@
 [![Latest Stable Version](https://poser.pugx.org/mouf/html.renderer/v/stable.svg)](https://packagist.org/packages/mouf/html.renderer) [![Total Downloads](https://poser.pugx.org/mouf/html.renderer/downloads.svg)](https://packagist.org/packages/mouf/html.renderer) [![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable.svg)](https://packagist.org/packages/mouf/html.renderer) [![License](https://poser.pugx.org/mouf/html.renderer/license.svg)](https://packagist.org/packages/mouf/html.renderer) 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/badges/quality-score.png?b=1.3)](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/?branch=1.3)
+[![Latest Unstable Version](https://poser.pugx.org/mouf/html.renderer/v/unstable)](https://packagist.org/packages/mouf/html.renderer)
+[![License](https://poser.pugx.org/mouf/html.renderer/license)](https://packagist.org/packages/mouf/html.renderer)
+[![Build Status](https://travis-ci.org/mouf/html.renderer.svg?branch=2.0)](https://travis-ci.org/mouf/html.renderer)
+[![Coverage Status](https://coveralls.io/repos/mouf/html.renderer/badge.svg?branch=2.0&service=github)](https://coveralls.io/github/mouf/html.renderer?branch=2.0)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/badges/quality-score.png?b=2.0)](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/?branch=2.0)
 
 What is this package?
 =====================
@@ -33,7 +37,7 @@ Renderers can be *chained*, and the first renderer that knows how to render an o
 Troubleshooting
 ---------------
 
-Your template or a custom template is not apply.
+Your template or a custom template is not applied.
 
 * Purge the cache with the red button in mouf.
 * You use Ajax and you return html with echo (for example BCE).
