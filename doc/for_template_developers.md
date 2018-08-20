@@ -20,7 +20,7 @@ it is likely you are extending the <code>BaseTemplate</code> class for your temp
 The <code>BaseTemplate</code> class comes with 2 properties:
 
 - **defaultRenderer**: the default renderer (main renderer used by the rendering engine)
-- **templateRenderer**: the renderer for this template
+- **templateRendererInstanceName**: the container identifier of the instance of the renderer for this template
 
 Basically, in your template instance, you should end up with something looking like this (this is a snapshot from the BootstrapTemplate):
 
@@ -32,7 +32,7 @@ To do this, you just need to add one line at the top of your <code>toHtml()</cod
 ```php
 public function toHtml(){
 	// Let's register the template renderer in the default renderer.
-	$this->getDefaultRenderer()->setTemplateRenderer($this->getTemplateRenderer());
+	$this->getDefaultRenderer()->setTemplateRendererInstanceName($this->getTemplateRendererInstanceName());
 
 	// Here goes the rest of your code.
 	...	
@@ -46,6 +46,8 @@ Most of the time, you will want to create a default template instance when your 
 
 Here is what you could add in your template installer:
 
+
+// TODO: fix this with real code from bootstrapTemplate!
 ```php
 // Let's create the template renderer
 $bootstrapRenderer = InstallUtils::getOrCreateInstance("bootstrapRenderer", "Mouf\\Html\\Renderer\\FileBasedRenderer", $moufManager);

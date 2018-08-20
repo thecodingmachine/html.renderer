@@ -5,81 +5,47 @@ If you are developing a package, and if you have items in your package that migh
 should definitely consider using the rendering system. Indeed, it is a simple way to allow your package
 users to [overload your template](for_application_developers.md), if they need to.
 
-For this, you need to provide a Mouf installer for your package, that will be in charge of creating the renderer's Mouf
-instance. Hopefully, this is fairly easy to do.
+For this, you need to provide a service-provider for your package, that will be in charge of registering the renderer's
+instance into your container. Hopefully, this is fairly easy to do.
 
-First, if you are not used to writing Mouf install scripts for your packages, have a look at 
-the [Mouf package installer documentation](http://mouf-php.com/packages/mouf/mouf/doc/install_process.md).
+First, if you are not used at writing universal service providers, have a look at 
+the [container-interop/service-provider documentation](https://github.com/container-interop/service-provider).
 
-If you are used to install script
----------------------------------
+Creating a service provider for the renderer
+--------------------------------------------
 
-The only thing you need to know is that you should put this line in your installer script:
+Your package needs to create a renderer and register it in the container, and let the `ChainRenderer` it exists.
 
-```php
-use Mouf\Html\Renderer\RendererUtils;
+This package provides a simple abstract class you can extend to create a service provider that will do the registration for you.
 
-RendererUtils::createPackageRenderer($moufManager, "group/package_name");
-```
-
-This will create a renderer instance automatically. Your templates should go in the *src/templates* directory of 
-your package.
-
-If you are not used to install scripts
---------------------------------------
-
-Here is a more detailed version of what you should do.
-
-First, let's start by creating an install script in **src/install.php**
+Here is a sample:
 
 ```php
-require_once __DIR__."/../../../autoload.php";
+namespace My\Package;
 
-use Mouf\Actions\InstallUtils;
-use Mouf\MoufManager;
-use Mouf\Html\Renderer\RendererUtils;
+use Mouf\Html\Renderer\AbstractPackageRendererServiceProvider;
 
-// Let's init Mouf
-InstallUtils::init(InstallUtils::$INIT_APP);
-
-$moufManager = MoufManager::getMoufManager();
-
-// Let's create the renderer
-RendererUtils::createPackageRenderer($moufManager, "group/package_name");
-
-// Let's rewrite the MoufComponents.php file to save the component
-$moufManager->rewriteMouf();
-
-// Finally, let's continue the install
-InstallUtils::continueInstall();
+class MyPackageRendererServiceProvider extends AbstractPackageRendererServiceProvider {
+    public static function getTemplateDirectory(): string
+    {
+        // Here, return the path to the templates directory of your package.
+        return __DIR__.'/templates';
+    }
+};
 ```
 
-You will need to replace the "group/package_name" string with the name of your package.
+Providing auto-discovery for this service provider
+--------------------------------------------------
 
-Finally, we must edit the **composer.json** file of your package and add this:
+For users using the `thecodingmachine/discovery` discovery system, you can register your service provider:
 
+**discovery.json**
 ```json
 {
-    ....
-    "extra": {
-        "mouf": {
-            "install": [
-                {
-                "type": "file",
-                "file": "src/install.php"
-                }
-            ]
-        }
-    }
+  "Interop\\Container\\ServiceProviderInterface": "My\\Package\\MyPackageRendererServiceProvider"
 }
 ```
 
-This will register our installer.
-For your installer to be detected, you will have to commit/push your changes, and run <code>php composer.phar update</code>
-so that Composer can detect your new install file.
-
-Then, each time you install your package, Mouf will propose an installation step in the Mouf UI that will
-create the renderer installer.
 
 Once you have done this, you can use the renderer in your package, [just like a normal application developer would do](for_application_developers.md), e.g.:
 

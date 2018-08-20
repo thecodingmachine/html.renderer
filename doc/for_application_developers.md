@@ -7,11 +7,11 @@ You are an application developer? Here is what you need to know to use the rende
 
 The rendering system provides an easy way to render in HTML your objects. This is a 3 steps process:
 
-1. Your class should implement the <code>HtmlElementInterface</code> (optional)
-2. Your class should use the <code>Renderable</code> trait
+1. Your class should implement the <code>HtmlElementInterface</code>
+2. Your class should use the <code>Renderable</code> trait (optional)
 3. You should add a template file in the *src/templates* directory
 
-Then you can render your class using the <code>toHtml()</code> method provided by the <code>Renderable</code> trait.
+Then you can render your class using the `toHtml()` method provided by the `Renderable` trait.
 
 Here is a minimalistic sample:
 
@@ -113,7 +113,7 @@ The $object variable is a pointer to the object you are rendering.
 Calling the renderer
 --------------------
 
-To call the renderer, you just have to call the <code>toHtml()</code> method.
+To call the renderer, you just have to call the `toHtml()` method.
 
 Here is a sample:
 
@@ -132,8 +132,8 @@ on the cache to speed up things. When you create a new template file or delete a
 purge the cache (the Red "Purge cache" button in Mouf2 UI).</div>
 
 One thing that is important to note: if your class
-[implements the <code>HtmlElementInterface</code> class](http://mouf-php.com/packages/mouf/html.htmlelement/README.md)
-(and you can implement it because all necessary methods are provided by the <code>Traversable</code> trait),
+[implements the `HtmlElementInterface` class](http://mouf-php.com/packages/mouf/html.htmlelement/README.md)
+(and you can implement it because all necessary methods are provided by the `Traversable` trait),
 then you can use instances of your class in many packages provided by Mouf (especially, you can drag'n'drop
 instances if your class directly into blocks, that are used by templates). This can be very useful!
 
@@ -166,15 +166,15 @@ You might be interested in knowning what is exactly happening when you call the 
 Here is what is happening:
 
 - The *render* method of the default renderer is called, and your object is passed to it.
-- What is the default renderer? It is a Mouf instance whose name is "defaultRenderer"
-- What is the default renderer doing? It will chain all the renderers it can find in Mouf, in this order:
-	- First, it will look at the developer renderers (by default in the "src/template" directory)
+- What is the default renderer? It is an instance in your container whose name is "Mouf\Html\Renderer\RendererInterface"
+- What is the default renderer doing? It will chain all the renderers it knows of, in this order:
+	- First, it will look at the application renderers (by default in the "src/templates" directory)
 	- Then, if a template has been used, it will look at the template's renderers to find a match
 	- Finally, it will try to find a template in the packages installed. A package can also have a renderer.
 	  Renderers in the packages can be ordered by priority.
 	  
 <div class="alert alert-info">When a new renderer is added (for instance when you install a package
-that uses its own renderer), do not forget to purge the cache (the Red "Purge cache" button in Mouf2 UI).</div>
+that uses its own renderer), do not forget to purge the cache (the Red "Purge cache" button if you are using Mouf UI).</div>
 
 Now that we saw how an application developer can use and overload a package template, let's have a look at the 
 way things are done [on the package developer side](for_package_developers.md)
