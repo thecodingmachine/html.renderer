@@ -33,7 +33,7 @@ class RendererServiceProviderTest extends TestCase
         $container = new Container([$packageRendererServiceProvider1, $packageRendererServiceProvider2, new RendererServiceProvider(), new SymfonyCacheServiceProvider(), new TwigServiceProvider()]);
 
         $renderersInstanceNames = $container->get('packageRenderers');
-        $this->assertSame([1=>'packageRenderer_tests/templateTemplates', 0=>'packageRenderer_tests/templates'], \iterator_to_array($renderersInstanceNames));
+        $this->assertSame([1=>'packageRenderer_tests/templateTemplates', 0=>'packageRenderer_tests/templates'], \iterator_to_array(clone $renderersInstanceNames));
 
         /* @var RendererInterface $renderer */
         $renderer = $container->get(RendererInterface::class);

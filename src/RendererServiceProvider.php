@@ -32,7 +32,7 @@ class RendererServiceProvider extends ServiceProvider
     }
 
     /**
-     * @Factory(name="customRenderer", tags={@Tag(name="customRenderers")})
+     * @Factory(name="customRenderer")
      * @return FileBasedRenderer
      */
     public static function createCustomRenderer(ContainerInterface $container, CacheInterface $cache, \Twig_Environment $twig): FileBasedRenderer
@@ -55,7 +55,9 @@ class RendererServiceProvider extends ServiceProvider
      */
     public static function createCustomRenderers(): \SplPriorityQueue
     {
-        return new \SplPriorityQueue();
+        $queue = new \SplPriorityQueue();
+        $queue->insert('customRenderer', 0);
+        return $queue;
     }
 
     /**
