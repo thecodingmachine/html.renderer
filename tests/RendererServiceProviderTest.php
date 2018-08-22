@@ -2,6 +2,7 @@
 
 namespace Mouf\Html\Renderer;
 
+use Mouf\Html\Renderer\Fixtures\MyImplementation;
 use PHPUnit\Framework\TestCase;
 use Simplex\Container;
 use TheCodingMachine\SymfonyCacheServiceProvider;
@@ -34,6 +35,12 @@ class RendererServiceProviderTest extends TestCase
         $renderersInstanceNames = $container->get('packageRenderers');
         $this->assertSame([1=>'packageRenderer_tests/templateTemplates', 0=>'packageRenderer_tests/templates'], \iterator_to_array($renderersInstanceNames));
 
+        /* @var RendererInterface $renderer */
         $renderer = $container->get(RendererInterface::class);
+
+        ob_start();
+        $renderer->render(new MyImplementation());
+        $html = ob_get_clean();
+        $this->assertSame('bar', $html);
     }
 }
