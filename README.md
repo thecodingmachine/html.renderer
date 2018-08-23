@@ -6,9 +6,6 @@
 [![Coverage Status](https://coveralls.io/repos/thecodingmachine/html.renderer/badge.svg?branch=2.0&service=github)](https://coveralls.io/github/thecodingmachine/html.renderer?branch=2.0)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/badges/quality-score.png?b=2.0)](https://scrutinizer-ci.com/g/thecodingmachine/html.renderer/?branch=2.0)
 
-TODO! CHANGE THE DOC FOR 2.0
-TALK ABOUT SERVICE PROVIDER
-
 What is this package?
 =====================
 
