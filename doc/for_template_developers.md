@@ -44,24 +44,28 @@ Writing the template installer
 
 Most of the time, you will want to create a default template instance when your package is installed.
 
-Here is what you could add in your template installer:
+Assuming you are using container-interop/service-provider and thecodingmachine/funky, your service provider will look like this:
 
-
-// TODO: fix this with real code from bootstrapTemplate!
 ```php
-// Let's create the template renderer
-$bootstrapRenderer = InstallUtils::getOrCreateInstance("bootstrapRenderer", "Mouf\\Html\\Renderer\\FileBasedRenderer", $moufManager);
-// Let's set the directory of the renderer
-$bootstrapRenderer->getProperty("directory")->setValue("vendor/mygroup/mypackage/src/templates");
-// Let's set the cache service
-$bootstrapRenderer->getProperty("cacheService")->setValue($moufManager->getInstanceDescriptor("rendererCacheService"));
-// This is a "template" renderer
-$bootstrapRenderer->getProperty("type")->setValue(ChainableRendererInterface::TYPE_TEMPLATE);
-$bootstrapRenderer->getProperty("priority")->setValue(0);
+class BootstrapTemplateServiceProvider extends ServiceProvider
+{
+    /**
+     * @Factory(aliases={TemplateInterface::class})
+     */
+    public function createBootstrapTemplate(CanSetTemplateRendererInterface $templateRenderer, ContainerInterface $container, WebLibraryManager $webLibraryManager): BootstrapTemplate
+    {
+        $bootstrapTemplate = new BootstrapTemplate($templateRenderer, "bootstrapTemplateRenderer");
+        // Some init stuff
+        // ...
+        return $bootstrapTemplate;
+    }
 
-// We assume that $template points to your template's instance descriptor.
-// We register your template renderer inside your template.
-$template->getProperty("templateRenderer")->setValue($bootstrapRenderer);
-// We register the default renderer inside your template.
-$template->getProperty("defaultRenderer")->setValue($moufManager->getInstanceDescriptor("defaultRenderer"));
+    /**
+     * @Factory(name="bootstrapTemplateRenderer")
+     */
+    public function createTemplateRenderer(CacheInterface $cache, ContainerInterface $container, \Twig_Environment $twig): FileBasedRenderer
+    {
+        return new FileBasedRenderer(__DIR__.'/../../../templates/', $cache, $container, $twig);
+    }
+}
 ``` 
