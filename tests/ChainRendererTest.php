@@ -35,6 +35,7 @@ class ChainRendererTest extends TestCase
                 $container
             );
         });
+        $container->set('root_url', '/');
 
         $chainRenderer = new ChainRenderer($container, ['customRenderer1'], ['packageRenderer1'], new ArrayCache(), 'uniqueName');
 

@@ -14,10 +14,13 @@ class FileBasedRendererTest extends TestCase
 {
     public function testFind()
     {
+        $container = new Container();
+        $container->set('root_url', '/');
+
         $renderer = new FileBasedRenderer(
             'tests/templates',
             new ArrayCache(),
-            new Container()
+            $container
         );
 
         $canRender = $renderer->canRender(new Foo());

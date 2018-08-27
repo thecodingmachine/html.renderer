@@ -78,7 +78,7 @@ class FileBasedRenderer implements ChainableRendererInterface
                 'auto_reload' => true,
                 'debug' => true
             ));
-            $this->twig->addExtension(new MoufTwigExtension($container));
+            $this->twig->addExtension(new MoufTwigExtension($container, $container->get('root_url')));
             $this->twig->addExtension(new \Twig_Extension_Debug());
         } else {
             // We need to modify the loader of the twig environment.
