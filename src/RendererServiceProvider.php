@@ -17,7 +17,7 @@ use TheCodingMachine\Funky\ServiceProvider;
 class RendererServiceProvider extends ServiceProvider
 {
     /**
-     * @Factory(aliases={RendererInterface::class})
+     * @Factory(aliases={RendererInterface::class, CanSetTemplateRendererInterface::class})
      * @return ChainRenderer
      */
     public static function createChainRenderer(ContainerInterface $container, CacheInterface $cache): ChainRenderer
